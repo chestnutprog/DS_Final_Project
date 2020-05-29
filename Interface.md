@@ -68,6 +68,7 @@ Every modifing operator should write to disk immediately.
 | ----------- | ----------- | ----------------------------------------- | ----------------------- |
 | -           | Core        | (BlocksUI& game)                          | Create Core Class       |
 | bool        | check       | (int col_a,int row_a,int col_b,int row_b) | check if exists a crash |
+| bool        | do_crash    | (void)                                    | call ui to do crash     |
 
 ## Network
 
