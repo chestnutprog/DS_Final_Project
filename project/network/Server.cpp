@@ -88,6 +88,43 @@ int main()
         });
 
     router->http_get(
+        R"(/updatePassword/:username/:password/:newPassword)",
+        [&](auto req, auto params) {
+            const auto qp = parse_query(req->header().query());
+            string username = cast_to<string>(params["username"]);
+            string password = cast_to<string>(params["password"]);
+            string newPassword = cast_to<string>(params["newPassword"]);
+            string result;
+            auto u = users.modifyPassword(username, password, newPassword, newPassword);
+            if (u == 103)
+                result = "success\n";
+            else if (u == 204)
+                result = "failed\nThis username doesn't exist in system.\n";
+            else
+                result = "failed\nWrong password.\n";
+            return req->create_response()
+                .set_body(result)
+                .done();
+        });
+
+    router->http_get(
+        R"(/updateScore/:username/:score(\d+))",
+        [&](auto req, auto params) {
+            const auto qp = parse_query(req->header().query());
+            string username = cast_to<string>(params["username"]);
+            int score = cast_to<int>(params["score"]);
+            string result;
+            auto u = users.updateScore(username, score);
+            if (u == 103)
+                result = "success\n";
+            else
+                result = "failed\nThis username has already existed in system.\n";
+            return req->create_response()
+                .set_body(result)
+                .done();
+        });
+
+    router->http_get(
         R"(/users)",
         [&](auto req, auto params) {
             const auto qp = parse_query(req->header().query());

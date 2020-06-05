@@ -19,7 +19,7 @@ public:
 	int login(string uname,string password);
 	int reg(string uname,string password1,string password2);
 	int modifyPassword(string uname,string password,string password1,string password2);
-	//int updateScore(string uname);
+	int updateScore(string uname,int newScore);
 	user getUser(string uname);
 	void showUsers();
 private:

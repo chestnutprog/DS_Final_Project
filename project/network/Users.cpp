@@ -43,7 +43,7 @@ string Users::showUsers()
 	stringstream ss;
 	for (int i = 0; i < users.size(); i++)
 	{
-		ss << users[i].username <<  " " << users[i].point << endl;
+		ss << users[i].username << " " << users[i].point << endl;
 	}
 	return ss.str();
 }
@@ -109,6 +109,24 @@ int Users::modifyPassword(string uname, string password, string password1, strin
 				users[i].password = password1;
 				flag = 103;
 			}
+		}
+	}
+	if (flag == 103)
+	{
+		save();
+	}
+	return flag;
+}
+
+int Users::updateScore(string uname, int newScore)
+{
+	int flag = 204; //用户名不存在
+	for (int i = 0; i < users.size(); i++)
+	{
+		if (users[i].username == uname)
+		{
+			users[i].point = newScore;
+			flag = 103;
 		}
 	}
 	if (flag == 103)
