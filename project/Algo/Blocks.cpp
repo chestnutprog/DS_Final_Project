@@ -1,6 +1,16 @@
 #include <bits/stdc++.h>
 #include "Blocks.h"
 using namespace std;
+bool Blocks::try_swap(int x_1, int y_1, int x_2, int y_2)
+{
+    // if after swap (x,y) could crash, then swap (x,y)
+    // else don't do operations on blocks.
+    if (!(((x_1 == x_2) && (abs(y_1 - y_2) == 1)) || ((y_1 == y_2) && (abs(x_1 - x_2) == 1))))
+        std::swap(blocks[x_1][y_1], blocks[x_2][y_2]);
+    vector<pair<int, int>> result = try_crash();
+    std::swap(blocks[x_1][y_1], blocks[x_2][y_2]);
+    return !result.empty();
+}
 bool Blocks::swap(int x_1, int y_1, int x_2, int y_2)
 {
     // if after swap (x,y) could crash, then swap (x,y)
