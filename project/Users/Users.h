@@ -7,17 +7,18 @@
 using namespace std;
 struct user{
 	string username;
-	string psd;
+	string password;
 	int point;
 };
-class ZhangHuXiTong
+class Users
 {
 public:
-	ZhangHuXiTong();
-	~ZhangHuXiTong();
-	int DengLu(string uname,string psd);
-	int ZhuCe(string uname,string psd1,string psd2);
-	int XiuGaiMiMa(string uname,string psd,string psd1,string psd2);
+	Users();
+	~Users();
+	void save();
+	int login(string uname,string password);
+	int reg(string uname,string password1,string password2);
+	int modifyPassword(string uname,string password,string password1,string password2);
 	void showUsers();
 private:
 	ifstream infile;
