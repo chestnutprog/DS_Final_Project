@@ -1,16 +1,17 @@
-#include "ZhangHuXiTong.h"
+#include "Users.h"
 
 void menu() {
 	cout << endl;
-	cout << "1.µÇÂ½" << endl;
-	cout << "2.×¢²á" << endl;
-	cout << "3.ÐÞ¸ÄÃÜÂë" << endl;
-	cout << "0.ÍË³ö" << endl;
-	cout << "ÇëÊäÈë±àºÅ½øÐÐ²Ù×÷£¡" << endl;
+	cout << "1.ç™»é™†" << endl;
+	cout << "2.æ³¨å†Œ" << endl;
+	cout << "3.ä¿®æ”¹å¯†ç " << endl;
+	cout << "4.å±•ç¤ºæŽ’è¡Œæ¦œ" << endl;
+	cout << "0.é€€å‡º" << endl;
+	cout << "è¯·è¾“å…¥ç¼–å·è¿›è¡Œæ“ä½œï¼" << endl;
 }
 
 int main() {
-	ZhangHuXiTong *z = new ZhangHuXiTong();
+	Users* z = new Users();
 	int k = -1;
 	string uname;
 	string psd, psd1, psd2;
@@ -21,68 +22,74 @@ int main() {
 		switch (k) {
 		case 1:
 			cout << endl;
-			cout << "ÊäÈëÓÃ»§Ãû£º" << endl;
+			cout << "è¾“å…¥ç”¨æˆ·åï¼š" << endl;
 			cin >> uname;
-			cout << "ÊäÈëÃÜÂë£º" << endl;
+			cout << "è¾“å…¥å¯†ç ï¼š" << endl;
 			cin >> psd;
-			flag = z->DengLu(uname, psd);
+			flag = z->login(uname, psd);
 			break;
 		case 2:
 			cout << endl;
-			cout << "ÇëÊäÈëÒª×¢²áµÄÓÃ»§Ãû£º" << endl;
+			cout << "è¯·è¾“å…¥è¦æ³¨å†Œçš„ç”¨æˆ·åï¼š" << endl;
 			cin >> uname;
-			cout << "ÇëÊäÈëÃÜÂë£º" << endl;
+			cout << "è¯·è¾“å…¥å¯†ç ï¼š" << endl;
 			cin >> psd1;
-			cout << "ÇëÔÙ´ÎÊäÈëÃÜÂë£º" << endl;
+			cout << "è¯·å†æ¬¡è¾“å…¥å¯†ç ï¼š" << endl;
 			cin >> psd2;
-			flag = z->ZhuCe(uname, psd1, psd2);
+			flag = z->reg(uname, psd1, psd2);
 			break;
 		case 3:
 			cout << endl;
-			cout << "ÇëÊäÈëÓÃ»§Ãû£º" << endl;
+			cout << "è¯·è¾“å…¥ç”¨æˆ·åï¼š" << endl;
 			cin >> uname;
-			cout << "ÇëÊäÈëÔ­ÃÜÂë£º" << endl;
+			cout << "è¯·è¾“å…¥åŽŸå¯†ç ï¼š" << endl;
 			cin >> psd;
-			cout << "ÇëÊäÈëÐÞ¸ÄºóµÄÃÜÂë£º" << endl;
+			cout << "è¯·è¾“å…¥ä¿®æ”¹åŽçš„å¯†ç ï¼š" << endl;
 			cin >> psd1;
-			cout << "ÇëÔÙ´ÎÊäÈëÃÜÂë£º" << endl;
+			cout << "è¯·å†æ¬¡è¾“å…¥å¯†ç ï¼š" << endl;
 			cin >> psd2;
-			flag = z->XiuGaiMiMa(uname, psd, psd1, psd2);
+			flag = z->modifyPassword(uname, psd, psd1, psd2);
 			break;
-		case '0':
+		case 0:
 			system("exit");
 			break;
+		case 4:
+			cout << endl;
+			z->sortUsers();
+			z->showUsers();
+			break;
 		default:
-			cout << "ÇëÊäÈëÕýÈ·µÄ±àºÅÀ´½øÐÐ²Ù×÷£¡" << endl;
+			cout << "è¯·è¾“å…¥æ­£ç¡®çš„ç¼–å·æ¥è¿›è¡Œæ“ä½œï¼" << endl;
 			break;
 		}
 
 		switch (flag) {
 		case 101:
-			//½øÈëÓÃ»§²Ù×÷½çÃæ
-			cout << "µÇÂ¼³É¹¦£¡" << endl;
+			//è¿›å…¥ç”¨æˆ·æ“ä½œç•Œé¢
+			cout << "ç™»å½•æˆåŠŸï¼" << endl;
 			k = 0;
 			break;
 		case 102:
-			cout << "×¢²á³É¹¦£¡" << endl;
+			cout << "æ³¨å†ŒæˆåŠŸï¼" << endl;
 			break;
 		case 103:
-			cout << "ÐÞ¸ÄÃÜÂë³É¹¦£¡" << endl;
+			cout << "ä¿®æ”¹å¯†ç æˆåŠŸï¼" << endl;
 			break;
 		case 201:
-			cout << "ÇëÊäÈëÕýÈ·µÄÓÃ»§ÃûÒÔ¼°ÃÜÂë£¡" << endl;
+			cout << "è¯·è¾“å…¥æ­£ç¡®çš„ç”¨æˆ·åä»¥åŠå¯†ç ï¼" << endl;
 			break;
 		case 202:
-			cout << "¸ÃÓÃ»§ÃûÒÑ¾­±»×¢²á£¡" << endl;
+			cout << "è¯¥ç”¨æˆ·åå·²ç»è¢«æ³¨å†Œï¼" << endl;
 			break;
 		case 203:
-			cout << "Á½´ÎÊäÈëÃÜÂë²»ÏàÍ¬£¡" << endl;
+			cout << "ä¸¤æ¬¡è¾“å…¥å¯†ç ä¸ç›¸åŒï¼" << endl;
 			break;
 		case 204:
-			cout << "¸ÃÓÃ»§Ãû²»´æÔÚ£¡" << endl;
+			cout << "è¯¥ç”¨æˆ·åä¸å­˜åœ¨ï¼" << endl;
 			break;
 		case 205:
-			cout << "ÃÜÂë´íÎó" << endl;
+			cout << "å¯†ç é”™è¯¯" << endl;
 		}
 	}
+}
 }
