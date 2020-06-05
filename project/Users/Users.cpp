@@ -1,8 +1,13 @@
 #include "Users.h"
 
+bool cmp_users(user u1, user u2) {//ç”¨æˆ·ä¹‹é—´åˆ†æ•°çš„æ¯”è¾ƒå™¨ï¼Œç”¨äºŽç”ŸæˆæŽ’è¡Œæ¦œ
+	if (u1.point > u2.point) return true;
+	else return false;
+}
+
 Users::Users() {
 	infile.open("Users.txt");
-	if (!infile) cout << "Ã»ÓÐ´ò¿ªÎÄ¼þ£¡" << endl;
+	if (!infile) cout << "æ²¡æœ‰æ‰“å¼€æ–‡ä»¶ï¼" << endl;
 
 	string s;
 	istringstream ss;
@@ -22,7 +27,7 @@ Users::~Users() {};
 void Users::save(){
 	ofstream outfile;
 	outfile.open("Users.txt");//, ios::beg);
-	if (!outfile) cout << "Ã»ÓÐ´ò¿ªÎÄ¼þ£¡" << endl;
+	if (!outfile) cout << "æ²¡æœ‰æ‰“å¼€æ–‡ä»¶ï¼" << endl;
 
 	for (int i = 0; i < users.size(); i++) {
 		outfile << users[i].username << " " << users[i].password << " " << users[i].point << endl;
@@ -33,11 +38,11 @@ void Users::save(){
 
 void Users::showUsers() {
 	for (int i = 0; i < users.size(); i++) {
-		cout << users[i].username << endl;
+		cout << i << " " << users[i].username << " " << users[i].point << endl;
 	}
 }
 
-int Users::login(string uname, string password) {//101µÇÂ½³É¹¦£¬201ÓÃ»§Ãû»òÃÜÂë´íÎó
+int Users::login(string uname, string password) {//101ç™»é™†æˆåŠŸï¼Œ201ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯
 	int flag = 201;
 	for (int i = 0; i < users.size(); i++) {
 		if (users[i].username == uname && users[i].password == password) {
@@ -49,7 +54,7 @@ int Users::login(string uname, string password) {//101µÇÂ½³É¹¦£¬201ÓÃ»§Ãû»òÃÜÂë´
 	return flag;
 }
 
-int Users::reg(string uname, string password1, string password2) {//102×¢²á³É¹¦£¬202ÒÑ±»×¢²á£¬203Á½´ÎÃÜÂë²»Í¬
+int Users::reg(string uname, string password1, string password2) {//102æ³¨å†ŒæˆåŠŸï¼Œ202å·²è¢«æ³¨å†Œï¼Œ203ä¸¤æ¬¡å¯†ç ä¸åŒ
 	int flag = 102;
 	for (int i = 0; i < users.size(); i++) {
 		if (users[i].username == uname ) {
@@ -71,14 +76,14 @@ int Users::reg(string uname, string password1, string password2) {//102×¢²á³É¹¦£
 }
 
 int Users::modifyPassword(string uname, string password, string password1, string password2) {
-	int flag = 204;//ÓÃ»§Ãû²»´æÔÚ
+	int flag = 204;//ç”¨æˆ·åä¸å­˜åœ¨
 	for (int i = 0; i < users.size(); i++) {
 		if (users[i].username == uname) {
 			if (password != users[i].password) {
-				flag = 205;//ÃÜÂë²»ÕýÈ·
+				flag = 205;//å¯†ç ä¸æ­£ç¡®
 			}
 			else if (password1 != password2) {
-				flag = 203;//Á½´ÎÊäÈëÃÜÂë²»Í¬
+				flag = 203;//ä¸¤æ¬¡è¾“å…¥å¯†ç ä¸åŒ
 			}
 			else {
 				users[i].password = password1;
@@ -90,4 +95,8 @@ int Users::modifyPassword(string uname, string password, string password1, strin
 		save();
 	}
 	return flag;
+}
+
+void Users::sortUsers() {
+	sort(users.begin(), users.end(), cmp_users);
 }
