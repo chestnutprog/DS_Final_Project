@@ -122,6 +122,24 @@ bool Blocks::has_solution()
     return false;
 }
 
+// X , Y , direction
+vector<tuple<int, int, bool>> Blocks::solutions()
+{
+    vector<tuple<int, int, bool>> solutions;
+    //traverse each of the element to swap
+    for (int i = 0; i < width - 1; i++)
+    {
+        for (int j = 0; j < height - 1; j++)
+        {
+            if (try_swap(blocks[i][j], blocks[i + 1][j])) // if it can swap with right
+                solutions.emplace_back({i, j, 0});
+            if (try_swap(blocks[i][j], blocks[i][j + 1])) // if it can swap with down
+                solutions.emplace_back({i, j, 1});
+        }
+    }
+    return solutions;
+}
+
 // Block (oldposition x, y) (new position x,y)
 // this is a helper function to calc animation;
 vector<tuple<BaseBlock *, int, int, int, int>> Blocks::crash()
