@@ -107,104 +107,16 @@ vector<pair<int, int>> Blocks::try_crash()
 bool Blocks::has_solution()
 {
     // Return is thers any swap that could make a crash.
-    bool  hasSolution;
+    bool hasSolution;
     //traverse each of the element to swap
-    for (int i=0;i<width;i++)
+    for (int i = 0; i < width - 1; i++)
     {
-        for (int j=0;j<height;j++)
+        for (int j = 0; j < height - 1; j++)
         {
-            //it has element on its left, up, right, down
-            if ((i>=1) && (j>=1) && (i<=width-1) && (j<=height-1))
-            {
-               if ( try_swap(blocks[i][j], blocks[i-1][j]))  // if it can swap with left
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j-1]))  // if it can swap with up
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i+1][j]))  // if it can swap with right
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j+1]))  // if it can swap with down
-                   return true;
-            }
-            
-            //it has element on its left, up, right, NO down
-            if ((j==height) && (i>=1) && (i<=width-1))
-            {
-               if ( try_swap(blocks[i][j], blocks[i-1][j]))  // if it can swap with left
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j-1]))  // if it can swap with up
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i+1][j]))  // if it can swap with right
-                   return true;
-            }
-            
-            //it has element on its left, up, NO right, down
-            if ((i==width) && (j>=1) && (j<=height-1))
-            {
-               if ( try_swap(blocks[i][j], blocks[i-1][j]))  // if it can swap with left
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j-1]))  // if it can swap with up
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j+1]))  // if it can swap with down
-                   return true;
-            }
-            
-            //it has element on its left, NO up, right, down
-            if ((j==0) && (i>=1) && (i<=width-1))
-            {
-               if ( try_swap(blocks[i][j], blocks[i-1][j]))  // if it can swap with left
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i+1][j]))  // if it can swap with right
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j+1]))  // if it can swap with down
-                   return true;
-            }
-            
-            //it has element on its NO left, up, right, down
-             if ((i==0) && (j>=1) && (j<=height-1))
-            {
-               if ( try_swap(blocks[i][j], blocks[i][j-1]))  // if it can swap with up
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i+1][j]))  // if it can swap with right
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j+1]))  // if it can swap with down
-                   return true;
-            }
-            
-            //left up corner
-             if ((i==0) && (j==0))
-            {
-               if ( try_swap(blocks[i][j], blocks[i+1][j]))  // if it can swap with right
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j+1]))  // if it can swap with down
-                   return true;
-            }
-            
-            //left down corner
-             if ((i==0) && (j==height))
-            {
-               if ( try_swap(blocks[i][j], blocks[i][j-1]))  // if it can swap with up
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i+1][j]))  // if it can swap with right
-                   return true;
-            }
-            
-            //right up corner
-             if ((i==width) && (j==0))
-            {
-               if ( try_swap(blocks[i][j], blocks[i-1][j]))  // if it can swap with left
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j+1]))  // if it can swap with down
-                   return true;
-            }
-            
-            //right down corner
-            if ((i==width) && (j==height))
-            {
-               if ( try_swap(blocks[i][j], blocks[i-1][j]))  // if it can swap with left
-                   return true;
-               if ( try_swap(blocks[i][j], blocks[i][j-1]))  // if it can swap with up
-                   return true;
-            }
+            if (try_swap(blocks[i][j], blocks[i + 1][j])) // if it can swap with right
+                return true;
+            if (try_swap(blocks[i][j], blocks[i][j + 1])) // if it can swap with down
+                return true;
         }
     }
     return false;
