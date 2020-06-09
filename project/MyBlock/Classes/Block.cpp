@@ -9,7 +9,7 @@ bool Block::init()
 	if (!Sprite::init())
 		return false;
 
-	// ≥ı ºªØ
+	// ÂàùÂßãÂåñ
 	block_type = -1;
 
 	return true;
@@ -17,7 +17,6 @@ bool Block::init()
 
 void Block::appear()
 {
-	// —” ±œ‘ æ∂Øª≠
 	setVisible(false);
 	scheduleOnce(CC_SCHEDULE_SELECTOR(Block::appearSchedule), 0.3);
 }
@@ -26,14 +25,12 @@ void Block::appearSchedule(float dt)
 {
 	setVisible(true);
 	setScale(0.5);
-
-	ScaleTo* scale_to = ScaleTo::create(0.2, 1.0);
-	runAction(scale_to);
+	runAction(ScaleTo::create(0.2, 1.0));
 }
 
 void Block::vanish()
 {
-	// —” ±œ‘ æ∂Øª≠
+	// Âª∂Êó∂ÊòæÁ§∫Âä®Áîª
 	ScaleTo* scale_to = ScaleTo::create(0.2, 0.5);
 	CallFunc* funcall = CallFunc::create([&]() {vanishCallback(); });
 	Sequence* sequence = Sequence::create(DelayTime::create(0.2), scale_to, funcall, NULL);

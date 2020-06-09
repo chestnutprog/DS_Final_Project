@@ -3,76 +3,57 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+#include "Blocks.h"
 
 class Block;
 
-// blockµÄĞĞÁĞÖµ½á¹¹Ìå
+// blockçš„è¡Œåˆ—å€¼ç»“æ„ä½“
 struct BlockPos
 {
 	int row;
 	int col;
 };
 
-// blockµÄÂß¼­½á¹¹Ìå
+// blockçš„é€»è¾‘ç»“æ„ä½“
 struct BlockProto
 {
 	int type;
 	bool marked;
 };
 
-
-// ±ØĞëÒªÄÜ¹»Layer²ÅÄÜ½ÓÊÕ´¥ÃşÊÂ¼şºÍ½øÈëÍË³öÊÂ¼ş
+// å¿…é¡»è¦èƒ½å¤ŸLayeræ‰èƒ½æ¥æ”¶è§¦æ‘¸äº‹ä»¶å’Œè¿›å…¥é€€å‡ºäº‹ä»¶
 class GameScene : public cocos2d::Layer
 {
 public:
-	static cocos2d::Scene* createScene();
+	static cocos2d::Scene *createScene();
+
+	int cant_touch = 0;
+	int moved = 0;
 
 	virtual bool init();
 	virtual void onEnter();
 	virtual void onExit();
 
-	virtual void update(float dt);
-
-	// ´¥Ãş¼ì²â
-	virtual bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
-	virtual void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
-	virtual void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
-
-	CREATE_FUNC(GameScene);//ÊÍ·ÅÄÚ´æ
+	CREATE_FUNC(GameScene); //é‡Šæ”¾å†…å­˜
 
 private:
-	std::vector<std::vector<BlockProto>> _game_board; // BlockÕóÁĞ£¬´¢´æÀàĞÍºÍ×´Ì¬
-	BlockPos _start_pos, _end_pos; // »¬¶¯µÄÆğÊ¼ºÍÖÕÖ¹Î»ÖÃ±êºÅ
+	int _score;			  // å¾—åˆ†
+	int _animation_score; // æ˜¾ç¤ºåœ¨è®°åˆ†ç‰Œçš„åˆ†æ•°
 
-	bool _is_moving; // ÊÇ·ñÔÚÒÆ¶¯ÖĞ
-	bool _is_can_touch; // ÊÇ·ñ¿É´¥Ãş
-	int _is_can_elimate; // ÊÇ·ñ¿ÉÒÔÏû³ı
+	cocos2d::Label *_score_label;
+	cocos2d::ProgressTimer *_progress_timer; // å€’è®¡æ—¶æ—¶é—´æ¡
+	cocos2d::Label *_combo_label;			 // æ˜¾ç¤ºcombo
 
-	BlockPos getBlockPosByCoordinate(float x, float y);// »ñÈ¡blockÔÚÓÎÏ·µØÍ¼µÄ×ø±ê
+	Blocks _blocks{*this};
 
-	int _score; // µÃ·Ö
-	cocos2d::Label* _score_label; 
-	int _animation_score; // ÏÔÊ¾ÔÚ¼Ç·ÖÅÆµÄ·ÖÊı
-	cocos2d::ProgressTimer* _progress_timer; // µ¹¼ÆÊ±Ê±¼äÌõ
-	cocos2d::Label* _combo_label; // ÏÔÊ¾combo
+	void fillGameBoard(int row, int col); // éšæœºå¡«å……æ¸¸æˆåœ°å›¾ï¼Œç›´åˆ°ç¡®ä¿æ²¡æœ‰å¯è‡ªåŠ¨æ¶ˆé™¤çš„
+	//void drawGameBoard(); // ç»˜åˆ¶æ¸¸æˆåœ°å›¾ç•Œé¢
+	void dropBlocks(float dt); // ä¸‹é™block
+	void fillVacantBlocks();   // å¡«å……ç©ºç™½
 
-	void fillGameBoard(int row, int col); // Ëæ»úÌî³äÓÎÏ·µØÍ¼£¬Ö±µ½È·±£Ã»ÓĞ¿É×Ô¶¯Ïû³ıµÄ
-	void drawGameBoard(); // »æÖÆÓÎÏ·µØÍ¼½çÃæ
-	void dropBlocks(float dt); // ÏÂ½µblock
-	void fillVacantBlocks(); // Ìî³ä¿Õ°×
-
-	void swapBlocks(BlockPos p1, BlockPos p2);// ½»»»Á½¸öblock
-
-	bool hasEliminate(); // ¼ì²éÊÇ·ñÓĞËæ»ú³öÏÖµÄ¿ÉÒÔ±»Ïû³ıµÄblock
-	std::vector<BlockPos> getEliminateSet(); // »ñµÃ¿ÉÏû³ıµÄblock¼¯ºÏ
-	void batchEliminate(const std::vector<BlockPos>& eliminate_list); // Ö´ĞĞÏû³ı
-	void delayBatchEliminate(float dt); // Ö´ĞĞÏû³ıºó»¹Ô­ÉèÖÃ
-	BlockPos checkGameHint(); // »ñÈ¡ÓÎÏ·ÌáÊ¾£¬ÅĞ¶ÏÓÎÏ·ÊÇ·ñÏİÈë½©¾Ö
-
-	void addScore(int delta_score); // ·ÖÊıÔö¼Ó
-	void addScoreCallback(float dt); // ·ÖÊı¸Ä±ä¶¯»­
-	void tickProgress(float dt); // ¸üĞÂ½ø¶ÈÌõ
-
+	void addScore(int delta_score);	 // åˆ†æ•°å¢åŠ 
+	void addScoreCallback(float dt); // åˆ†æ•°æ”¹å˜åŠ¨ç”»
+	void tickProgress(float dt);	 // æ›´æ–°è¿›åº¦æ¡
 };
 
 #endif // __HELLOWORLD_SCENE_H__

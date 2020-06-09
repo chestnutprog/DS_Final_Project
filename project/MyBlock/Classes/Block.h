@@ -8,12 +8,12 @@ class Block : public cocos2d::Sprite
 public:
 	virtual bool init();
 
-	int block_type; // 图标类型
+	int block_type; // 鍥炬爣绫诲瀷
 
-	void appear(); // 出现动画
+	void appear(); // 鍑虹幇鍔ㄧ敾
 	void appearSchedule(float dt); 
 
-	void vanish(); // 消失动画
+	void vanish(); // 娑堝け鍔ㄧ敾
 	void vanishCallback(); 
 
 	CREATE_FUNC(Block);

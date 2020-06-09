@@ -1,698 +1,191 @@
 #include "AudioEngine.h"
 #include "GameScene.h"
 #include "block.h"
+#include <cmath>
+#include <algorithm>
+
+
+const double _PI = 2 * acos(0);
 
 USING_NS_CC;
 //using namespace CocosDenshion;
 
-//³¡¾°²ã´Î
-const int BackGroundLevel = 0; // ±³¾°²ã
-const int GameBoardLevel = 1;  // Êµ¼ÊµÄÓÎÏ·²Ù×÷²ã
-const int FlashLevel = 3; // ÏÔÊ¾comboµÄ¶¯»­²ã
-const int MenuLevel = 5; // ²Ëµ¥²ã
+//åœºæ™¯å±‚æ¬¡
+const int BackGroundLevel = 0; // èƒŒæ™¯å±‚
+const int GameBoardLevel = 1;  // å®é™…çš„æ¸¸æˆæ“ä½œå±‚
+const int FlashLevel = 3;	   // æ˜¾ç¤ºcomboçš„åŠ¨ç”»å±‚
+const int MenuLevel = 5;	   // èœå•å±‚
 
-//blockÍ¼±ê
-const std::vector<std::string> BlockImgArray{
-	"images/b1.png",
-	"images/b2.png",
-	"images/b3.png",
-	"images/b4.png",
-	"images/b5.png",
-	"images/b6.png"
-};
-
-// comboÎÄ×Ö
+// comboæ–‡å­—
 const std::vector<std::string> ComboTextArray{
 	"Good",
 	"Great",
-	"Unbelievable"
-};
+	"Unbelievable"};
 
-// ÉùÒôÎÄ¼ş
+// å£°éŸ³æ–‡ä»¶
 const std::string BackgourndMusic = "sounds/background.mp3";
 const std::string WelcomeEffect = "sounds/welcome.mp3";
 const std::string PopEffect = "sounds/pop.mp3";
 const std::string UnbelievableEffect = "sounds/unbelievable.mp3";
 
-// Ïû³ı·ÖÊıµ¥Î»
+// æ¶ˆé™¤åˆ†æ•°å•ä½
 const int ScoreUnit = 10;
 
-// Ïû³ıÊ±ºòÀàĞÍºÍĞ§¹û
-const int BlockEliminateType = 10;//blockÎªÏû³ı×´Ì¬Ê±µÄtype
+// æ¶ˆé™¤æ—¶å€™ç±»å‹å’Œæ•ˆæœ
+const int BlockEliminateType = 10; //blockä¸ºæ¶ˆé™¤çŠ¶æ€æ—¶çš„type
 const std::string EliminateStartImg = "images/star.png";
 
-// ½çÃæ±ß¾à
+// ç•Œé¢è¾¹è·
 const float LeftMargin = 20;
 const float RightMargin = 20;
 const float BottonMargin = 70;
 
-// blockĞĞÁĞÊı
+// blockè¡Œåˆ—æ•°
 const int RowNum = 8;
 const int ColNum = 8;
 
-// ¼ÆÊıÒÑ½»»»block
+// è®¡æ•°å·²äº¤æ¢block
 const int EliminateInitFlag = 0;
 const int EliminateOneReadyFlag = 1;
 const int EliminateTwoReadyFlag = 2;
 
-//»ñµÃËæ»úblock
+//è·å¾—éšæœºblock
 int getRandomSpriteIndex(int len)
 {
 	return rand() % len;
 }
 
-// ÊµÀı»¯Ö÷³¡¾°ºÍ²ã
-Scene* GameScene::createScene()
+// å®ä¾‹åŒ–ä¸»åœºæ™¯å’Œå±‚
+Scene *GameScene::createScene()
 {
-	Scene* game_scene = Scene::create();
+	Scene *game_scene = Scene::create();
 	Layer* game_layer = GameScene::create();
 	game_scene->addChild(game_layer);
 	return game_scene;
 }
 
-
-// ³õÊ¼»¯ÓÎÏ·³¡¾°
+// åˆå§‹åŒ–æ¸¸æˆåœºæ™¯
 bool GameScene::init()
 {
 	if (!Layer::init())
 		return false;
 
-
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	// ¼ÓÔØÓÎÏ·½çÃæ±³¾°(×îµ×²ã
-	//Sprite* game_background = Sprite::create("images/game_bg.jpg");
-	//game_background->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
-	//addChild(game_background, BackGroundLevel);
+	// åŠ è½½æ¸¸æˆç•Œé¢èƒŒæ™¯(æœ€åº•å±‚
+	Sprite *game_background = Sprite::create("images/game_bg.jpg");
+	game_background->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
+	addChild(game_background, BackGroundLevel);
 
-	// ³õÊ¼»¯ÓÎÏ·µØÍ¼
-	for (int i = 0; i < RowNum; i++)
-	{
-		std::vector<BlockProto> line_blocks;
-		for (int j = 0; j < ColNum; j++)
-		{
-			BlockProto block_proto;
-			block_proto.type = BlockEliminateType; // ³õÊ¼»¯ÖÃ³ÉÏû³ı×´Ì¬
-			block_proto.marked = false;
-
-			line_blocks.push_back(block_proto);//½«¿Õblock¼ÓÈë¸ÃĞĞ
-		}
-		_game_board.push_back(line_blocks);
-	}
-
-	// »æÖÆÓÎÏ·µØÍ¼
-	drawGameBoard();
-
-
-	// ³õÊ¼»¯ÓÎÏ··ÖÊı
+	// åˆå§‹åŒ–æ¸¸æˆåˆ†æ•°
 	_score = 0;
 	_animation_score = 0;
-	
+
 	_score_label = Label::createWithTTF(StringUtils::format("score: %d", _score), "fonts/Marker Felt.ttf", 20);
 	_score_label->setTextColor(cocos2d::Color4B::YELLOW);
 	_score_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.9);
 	_score_label->setName("score");
-	addChild(_score_label, BackGroundLevel);// ½«¼Ç·ÖÅÆ¼ÓÈë±³¾°²ã
+	addChild(_score_label, BackGroundLevel); // å°†è®°åˆ†ç‰ŒåŠ å…¥èƒŒæ™¯å±‚
 
-
-	// ³õÊ¼»¬¶¯µÄ¿ªÊ¼ºÍ½áÊø×ø±ê
-	_start_pos.row = -1;
-	_start_pos.col = -1;
-
-	_end_pos.row = -1;
-	_end_pos.col = -1;
-
-
-	// ³õÊ¼ÒÆ¶¯×´Ì¬
-	_is_moving = false;
-	_is_can_touch = true;
-	_is_can_elimate = 0; // 0, 1, 2Èı¸öµÈ¼¶£¬0Îª³õÊ¼£¬1±íÊ¾Ò»¸ö¾«Áéready£¬2±íÊ¾Á½¸ö¾«Áéready£¬¿ÉÒÔÏû³ı
-
-
-	// µ¹¼ÆÊ±Ê±¼äÌõ
-	_progress_timer = ProgressTimer::create(Sprite::create("images/progress_bar.png"));//´´½¨Ò»¸öµ¹¼ÆÊ±Ê±¼äÌõ
+	// å€’è®¡æ—¶æ—¶é—´æ¡
+	_progress_timer = ProgressTimer::create(Sprite::create("images/progress_bar.png")); //åˆ›å»ºä¸€ä¸ªå€’è®¡æ—¶æ—¶é—´æ¡
 	_progress_timer->setBarChangeRate(Point(1, 0));
 	_progress_timer->setType(ProgressTimer::Type::BAR);
 	_progress_timer->setMidpoint(Point(0, 1));
-	_progress_timer->setPosition(Point(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.8));//Î»ÖÃÂÔµÍÓÚ¼Ç·ÖÅÆ
-	_progress_timer->setPercentage(100.0); // Ê±¼ä³õÊ¼ÎªÂú
-	addChild(_progress_timer, BackGroundLevel);// ½«Ê±¼äÌõ¼ÓÈë±³¾°²ã
-	schedule(CC_SCHEDULE_SELECTOR(GameScene::tickProgress), 1.0);//ÒÔ1sÎªµ¥Î»
+	_progress_timer->setPosition(Point(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.8)); //ä½ç½®ç•¥ä½äºè®°åˆ†ç‰Œ
+	_progress_timer->setPercentage(100.0);																		// æ—¶é—´åˆå§‹ä¸ºæ»¡
+	addChild(_progress_timer, BackGroundLevel);																	// å°†æ—¶é—´æ¡åŠ å…¥èƒŒæ™¯å±‚
+	schedule(CC_SCHEDULE_SELECTOR(GameScene::tickProgress), 1.0);												//ä»¥1sä¸ºå•ä½
 
-
-	// ²¥·ÅÒôĞ§
-	//SimpleAudioEngine::getInstance()->playBackgroundMusic(BackgourndMusic.c_str(), true);
+	// æ’­æ”¾éŸ³æ•ˆ
+	AudioEngine::play2d(BackgourndMusic.c_str(), true, 1.0f);
+	//SimpleAudioEngine::getInstance()->playBackgroundMusic(, true);
 	//SimpleAudioEngine::getInstance()->playEffect(WelcomeEffect.c_str());
 
-
-	// Ìí¼ÓcomboÎÄ×Ö
+	// æ·»åŠ comboæ–‡å­—
 	_combo_label = Label::createWithTTF(StringUtils::format("Ready Go"), "fonts/Marker Felt.ttf", 40);
 	_combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
 	addChild(_combo_label, FlashLevel);
 
 	_combo_label->runAction(Sequence::create(DelayTime::create(0.8), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
-		// ×¼±¸¶¯»­³öÏÖ
-		_combo_label->setVisible(false);//×¼±¸¶¯»­Òş²Ø
-		_combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);//Á¬»÷¶¯»­Î»ÖÃ
-		}), NULL));
-	//¶¯»­¶¯×÷ĞòÁĞSequence£ºlabel->runAction(Sequence::create(MoveBy::create(1, Point(100,100)), RotateBy::create(1, 360),NULL));
+												 // å‡†å¤‡åŠ¨ç”»å‡ºç°
+												 _combo_label->setVisible(false);																 //å‡†å¤‡åŠ¨ç”»éšè—
+												 _combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2); //è¿å‡»åŠ¨ç”»ä½ç½®
+											 }),
+											 NULL));
+	//åŠ¨ç”»åŠ¨ä½œåºåˆ—Sequenceï¼šlabel->runAction(Sequence::create(MoveBy::create(1, Point(100,100)), RotateBy::create(1, 360),NULL));
 
+	//æ·»åŠ è§¦æ‘¸äº‹ä»¶ç›‘å¬
+	EventListenerTouchOneByOne *touch_listener = EventListenerTouchOneByOne::create();
+	touch_listener->onTouchBegan = [&](Touch* touch, Event* event) {
+		auto target = static_cast<Sprite*>(event->getCurrentTarget());
+		Vec2 locationInNode = target->convertToNodeSpace(touch->getLocation());
 
-	// Ìí¼Ó´¥ÃşÊÂ¼ş¼àÌı
-	EventListenerTouchOneByOne* touch_listener = EventListenerTouchOneByOne::create();
-	touch_listener->onTouchBegan = CC_CALLBACK_2(GameScene::onTouchBegan, this);
-	touch_listener->onTouchMoved = CC_CALLBACK_2(GameScene::onTouchMoved, this);
-	touch_listener->onTouchEnded = CC_CALLBACK_2(GameScene::onTouchEnded, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this); // ¸¸ÀàµÄ _eventDispatcher
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		Rect rect = Rect(_blocks.LeftMargin, _blocks.ButtomMargin, visibleSize.width - _blocks.LeftMargin - _blocks.RightMargin, _blocks.block_size * _blocks.height);
+		//log("%f %f %f %f", _blocks.LeftMargin, _blocks.ButtomMargin, visibleSize.width - _blocks.LeftMargin - _blocks.RightMargin, _blocks.block_size * _blocks.height);
+		//log("%d", cant_touch);
+		if (!cant_touch && rect.containsPoint(locationInNode))
+		{
+			log("sprite began... x = %f, y = %f", locationInNode.x, locationInNode.y);
+			cant_touch++;
+			return true;
+		}
+		//log("???");
+		return false;
+	};
 
+	touch_listener->onTouchMoved = [&](Touch* touch, Event* event) {
+		if (!moved && touch->getLocation().distance(touch->getStartLocation()) > _blocks.block_size * 0.4) {
+			moved=1;
+			auto direction_vec = touch->getLocation() - touch->getStartLocation();
+			direction_vec.rotate(Vec2(), _PI / 4);
+			auto angle = atan2(direction_vec.x, direction_vec.y);
+			int direction = std::max(std::min(int(floor(angle * 2 / _PI)) + 2,3),0);
+			
+			int block_col = floor((touch->getStartLocation().x - _blocks.LeftMargin) / _blocks.block_size);
+			int block_row = floor((touch->getStartLocation().y - _blocks.ButtomMargin) / _blocks.block_size);
+			_blocks.swap(block_row, block_col, direction);
+		}
+	};
 
-	// Ä¬ÈÏ¶¨Ê±Æ÷°´Ö¡¸üĞÂ
+	touch_listener->onTouchEnded = [&](Touch* touch, Event* event) {
+		cant_touch--;
+		moved=0;
+		log("onTouchEnded");
+	};
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this); // çˆ¶ç±»çš„ _eventDispatcher
+
+	// é»˜è®¤å®šæ—¶å™¨æŒ‰å¸§æ›´æ–°
 	scheduleUpdate();
 
 	return true;
 }
-BlockPos GameScene::getBlockPosByCoordinate(float x, float y)
-{
-	const Size visibleSize = Director::getInstance()->getVisibleSize();
-	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	float block_size = (visibleSize.width - LeftMargin - RightMargin) / ColNum;//blockµÄ±ß³¤
 
-	float row = (y - BottonMargin) / block_size;
-	float col = (x - LeftMargin) / block_size;
 
-	BlockPos pos;
-	pos.row = row;
-	pos.col = col;
-
-	return pos;
-}
-
-// Ëæ»úÌî³äÓÎÏ·µØÍ¼£¬Ö±µ½È·±£Ã»ÓĞ¿É×Ô¶¯Ïû³ıµÄ
-void GameScene::fillGameBoard(int row, int col)
-{
-	// ÅĞ¶Ï±ß½ç
-	if (row == -1 || row == RowNum || col == -1 || col == ColNum)
-		return;
-
-	// Ëæ»úÉú³ÉÀàĞÍ
-	int random_type = getRandomSpriteIndex(BlockImgArray.size());
-
-	// Ìî³ä
-	if (_game_board[row][col].type == BlockEliminateType)
-	{
-		_game_board[row][col].type = random_type;
-
-		// Èç¹ûÃ»ÓĞÏû³ıÔò¼ÌĞøÏòÖÜÎ§Ìî³ä
-		if (!hasEliminate())
-		{
-			// ËÄ¸ö·½Ïòµİ¹éÌî³ä
-			fillGameBoard(row + 1, col);
-			fillGameBoard(row - 1, col);
-			fillGameBoard(row, col - 1);
-			fillGameBoard(row, col + 1);
-		}
-		else
-			_game_board[row][col].type = BlockEliminateType; // »¹Ô­
-	}
-}
-bool GameScene::hasEliminate()
-{
-	// ÓĞÏàÍ¬ÇÒ²»±»±ê¼ÇÎªÏû³ıµÄÁ¬ĞøÈı¸öblock¼´·µ»Øtrue
-	bool has_elminate = false;
-	for (int i = 0; i < RowNum; i++)
-	{
-		for (int j = 0; j < ColNum; j++)
-		{
-			if (_game_board[i][j].type != BlockEliminateType)
-			{
-				// ÅĞ¶ÏÉÏÏÂÊÇ·ñÏàÍ¬
-				if (i - 1 >= 0
-					&& _game_board[i - 1][j].type != BlockEliminateType
-					&& _game_board[i - 1][j].type == _game_board[i][j].type
-					&& i + 1 < RowNum
-					&& _game_board[i + 1][j].type != BlockEliminateType
-					&& _game_board[i + 1][j].type == _game_board[i][j].type)
-				{
-					has_elminate = true;
-					break;
-				}
-
-				// ÅĞ¶Ï×óÓÒÊÇ·ñÏàÍ¬
-				if (j - 1 >= 0
-					&& _game_board[i][j - 1].type != BlockEliminateType
-					&& _game_board[i][j - 1].type == _game_board[i][j].type
-					&& j + 1 < ColNum
-					&& _game_board[i][j - 1].type != BlockEliminateType
-					&& _game_board[i][j + 1].type == _game_board[i][j].type)
-				{
-					has_elminate = true;
-					break;
-				}
-			}
-		}
-
-		if (has_elminate)
-			break;
-	}
-
-	return has_elminate;
-}
-void GameScene::drawGameBoard()
-{
-	srand(unsigned(time(0))); 
-
-	// ±£Ö¤³õÊ¼Ã»ÓĞ¿ÉÏû³ıµÄ
-	fillGameBoard(0, 0);
-
-
-	// Èç¹ûÉú³É²»ÍêÃÀĞèÒªÖØĞÂÉú³É
-	bool is_need_regenerate = false;
-	for (int i = 0; i < RowNum; i++)
-	{
-		for (int j = 0; j < ColNum; j++)
-		{
-			if (_game_board[i][j].type == BlockEliminateType)
-			{
-				is_need_regenerate = true;
-			}
-		}
-
-		if (is_need_regenerate)
-			break;
-	}
-	if (is_need_regenerate)
-	{
-		CCLOG("redraw game board");
-		drawGameBoard();
-		return;
-	}
-
-
-	const Size visibleSize = Director::getInstance()->getVisibleSize();
-	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-	// Ìí¼ÓÏû³ı¶ÔÏó¾ØÕó£¬ÓÎÏ·Âß¼­Óë½çÃæ½âñî
-	float block_size = (visibleSize.width - LeftMargin - RightMargin) / ColNum;
-
-	for (int i = 0; i < RowNum; i++)
-	{
-		for (int j = 0; j < ColNum; j++)
-		{
-			Block* block = Block::create();
-
-			block->block_type = _game_board[i][j].type;
-			block->setTexture(BlockImgArray[block->block_type]); // ·ÖÅäÍ¼±ê	
-			block->setContentSize(Size(block_size, block_size)); // ÉèÖÃ³ß´ç
-
-
-			Point init_position(LeftMargin + (j + 0.5) * block_size, BottonMargin + (i + 0.5) * block_size + 0.5 * block_size);
-			block->setPosition(init_position);
-			Point real_position(LeftMargin + (j + 0.5) * block_size, BottonMargin + (i + 0.5) * block_size);
-			Sequence* sequence = Sequence::create(MoveTo::create(0.5, real_position), CallFunc::create([=]() {
-				block->setPosition(real_position); // block´Ó¸ßÓÚ×ÔÉí±ß³¤Ò»°ëµÄÎ»ÖÃÍùÏÂÒÆ¶¯£¬×÷ÎªµôÂä¶¯»­
-				}), NULL);
-			block->runAction(sequence);
-
-
-			std::string block_name = StringUtils::format("%d_%d", i, j);
-			block->setName(block_name); // ¸øÃ¿¸öblock±àºÅ
-			addChild(block, GameBoardLevel);//½«block¼ÓÈë±³¾°²ã
-		}
-	}
-}
-void GameScene::dropBlocks(float dt)
-{
-	_is_can_touch = false;
-
-
-	const Size visibleSize = Director::getInstance()->getVisibleSize();
-	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	float block_size = (visibleSize.width - LeftMargin - RightMargin) / ColNum;
-
-	// blockÏÂÂäÌî²¹¿Õ°×
-	for (int j = 0; j < ColNum; j++)
-	{
-		std::vector<Block*> blocks;
-		for (int i = RowNum - 1; i >= 0; i--)
-		{
-			if (_game_board[i][j].type != BlockEliminateType)
-			{
-				std::string block_name = StringUtils::format("%d_%d", i, j);
-				Block* block = (Block*)getChildByName(block_name);
-				blocks.push_back(block);
-			}// »ñµÃ¿Õ°×ÉÏ·½µÄblocks
-			else
-				break; 
-		}
-
-		// Ö»ÓĞÖĞ¼äÓĞ¿ÕÈ±²Å´¦Àí
-		if (blocks.size() == RowNum || blocks.empty())
-			continue;
-
-		// ÏÈ·´ĞòÒ»ÏÂ
-		std::reverse(blocks.begin(), blocks.end());
-
-		// Ã¿ÁĞÏÂ½µ
-		int k = 0;
-		while (k < RowNum)
-		{
-			// ÕÒµ½µÚÒ»¸ö¿Õ°×µÄ
-			if (_game_board[k][j].type == BlockEliminateType)
-				break;
-
-			k++;
-		}
-
-		for (int i = 0; i < blocks.size(); i++)
-		{
-			_game_board[k][j].type = blocks[i]->block_type;
-			_game_board[k][j].marked = false;
-
-			
-			Point new_position(LeftMargin + (j + 0.5) * block_size, BottonMargin + (k + 0.5) * block_size);
-			Sequence* sequence = Sequence::create(MoveTo::create(0.1, new_position), CallFunc::create([=]() {
-				blocks[i]->setPosition(new_position); 
-				}), NULL);
-			blocks[i]->runAction(sequence);
-			std::string new_name = StringUtils::format("%d_%d", k, j);
-			blocks[i]->setName(new_name);
-
-			k++;
-		}
-
-		while (k < RowNum)
-		{
-			_game_board[k][j].type = BlockEliminateType;
-			_game_board[k][j].marked = true;
-			k++;
-		}
-
-	}
-
-	// ÏÂ½µºóÌî²¹¶¥²¿¿Õ°×
-	fillVacantBlocks();
-
-	// ¸üĞÂ
-	scheduleOnce(CC_SCHEDULE_SELECTOR(GameScene::delayBatchEliminate), 0.9);
-
-	_is_can_touch = true;
-}
-
-void GameScene::delayBatchEliminate(float dt)
-{
-	// ¼ìÑéÊÇ·ñ¿ÉÁ¬ĞøÏû³ı
-	auto eliminate_set = getEliminateSet();
-	if (!eliminate_set.empty())
-	{
-		batchEliminate(eliminate_set);
-
-		// Ïû³ıÍê±Ï£¬»¹Ô­flag
-		_is_can_elimate = EliminateInitFlag;
-
-		// »¹Ô­»¬¶¯ÆğÊ¼ºÍÖÕÖ¹Î»ÖÃ
-		_start_pos.row = -1;
-		_start_pos.col = -1;
-
-		_end_pos.row = -1;
-		_end_pos.col = -1;
-	}
-}
-
-void GameScene::fillVacantBlocks()
-{
-	const Size visibleSize = Director::getInstance()->getVisibleSize();
-	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-	float block_size = (visibleSize.width - LeftMargin - RightMargin) / ColNum;
-
-	int len = BlockImgArray.size();
-
-	srand(unsigned(time(0))); // ³õÊ¼»¯Ëæ»úÊı·¢ÉúÆ÷
-
-	// ÏÈ»ñÈ¡¿Õ°×blocks
-	for (int i = 0; i < RowNum; i++)
-		for (int j = 0; j < ColNum; j++)
-		{
-			if (_game_board[i][j].type == BlockEliminateType)
-			{
-				int random_type = getRandomSpriteIndex(len);
-				_game_board[i][j].type = random_type;
-				_game_board[i][j].marked = false;
-
-				Block* block = Block::create();
-
-				block->block_type = _game_board[i][j].type;
-				block->setTexture(BlockImgArray[block->block_type]); // Ìí¼ÓÍ¼±ê	
-				block->setContentSize(Size(block_size, block_size)); // ÉèÖÃ³ß´ç
-
-				Point real_position(LeftMargin + (j + 0.5) * block_size, BottonMargin + (i + 0.5) * block_size);
-				block->setPosition(real_position); 
-
-				// block³öÏÖ¶¯»­
-				block->appear();
-
-				std::string block_name = StringUtils::format("%d_%d", i, j);
-				block->setName(block_name); // ¸øblock±àºÅ
-				addChild(block, GameBoardLevel);//½«block¼ÓÈë±³¾°²ã
-			}
-		}
-}
-
-void GameScene::swapBlocks(BlockPos p1, BlockPos p2)
-{
-	// ½»»»Ê±²»¿É»¬¶¯
-	_is_can_touch = false;
-
-	const Size visibleSize = Director::getInstance()->getVisibleSize();
-	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-	float block_size = (visibleSize.width - LeftMargin - RightMargin) / ColNum;
-
-
-	// »ñµÃ²Ù×÷µÄblocksĞÅÏ¢
-	std::string name1 = StringUtils::format("%d_%d", p1.row, p1.col);
-	std::string name2 = StringUtils::format("%d_%d", p2.row, p2.col);
-
-	Block* block1 = (Block*)getChildByName(name1);
-	Block* block2= (Block*)getChildByName(name2);
-
-	Point position1 = block1->getPosition();
-	Point position2 = block2->getPosition();
-
-	int type1 = block1->block_type;
-	int type2 = block2->block_type;
-
-	// ÄÚ´æÖĞ½»»»blockÀàĞÍ
-	std::swap(_game_board[p1.row][p1.col], _game_board[p2.row][p2.col]);
-
-	// ÒÆ¶¯¶¯»­, move action²¢²»»á¸üĞÂposition
-
-	MoveTo* move_1to2 = MoveTo::create(0.2, position2);
-	MoveTo* move_2to1 = MoveTo::create(0.2, position1);
-
-	block1->runAction(Sequence::create(move_1to2, CallFunc::create([=]() {
-		
-		block1->setPosition(position2);
-		// ½»»»Ãû³Æ
-		block1->setName(name2);
-
-		_is_can_elimate++;
-
-		}), NULL));
-
-	block2->runAction(Sequence::create(move_2to1, CallFunc::create([=]() {
-
-	block2->setPosition(position1);
-	block2->setName(name1);
-
-	_is_can_elimate++;
-
-	}), NULL));
-
-	// ½»»»ºó½øĞĞÏû³ı
-	if (_is_can_elimate == EliminateTwoReadyFlag)
-	{
-		auto eliminate_set = getEliminateSet();
-		if (!eliminate_set.empty())
-		{
-			batchEliminate(eliminate_set);
-			// Ïû³ıÍê±Ï£¬»¹Ô­flag
-			_is_can_elimate = EliminateInitFlag;
-
-			// ¸´Î»»¬¶¯ÆğÊ¼ºÍÖÕÖ¹Î»ÖÃ
-			_start_pos.row = -1;
-			_start_pos.col = -1;
-
-			_end_pos.row = -1;
-			_end_pos.col = -1;
-		}
-	}
-	// »Ö¸´´¥Ãş×´Ì¬
-	_is_can_touch = true;
-}
-// É¨Ãè¼ì²é¿ÉÏû³ıblock£¬Ìí¼Óµ½¿ÉÏû³ı¼¯ºÏ
-
-std::vector<BlockPos> GameScene::getEliminateSet()
-{
-	std::vector<BlockPos> res_eliminate_list;
-	// É¨ÃèÈ·¶¨¿ÉÒÔÈıÏûµÄ½á¹û¼¯£¬ºáÊúÁ¬×Å´óÓÚ»òµÈÓÚ3¸ö¾ÍÏû³ı
-	for (int i = 0; i < RowNum; i++)
-		for (int j = 0; j < ColNum; j++)
-		{
-			// ÅĞ¶ÏÉÏÏÂÊÇ·ñÏàÍ¬
-			if (i - 1 >= 0
-				&& _game_board[i - 1][j].type == _game_board[i][j].type
-				&& i + 1 < RowNum
-				&& _game_board[i + 1][j].type == _game_board[i][j].type)
-			{
-				// Ìí¼ÓÁ¬×ÅµÄÊúÏòÈı¸ö
-				if (!_game_board[i][j].marked && _game_board[i][j].type != BlockEliminateType)
-				{
-					BlockPos pos;
-					pos.row = i;
-					pos.col = j;
-
-					res_eliminate_list.push_back(pos);
-					_game_board[i][j].marked = true;
-				}
-				if (!_game_board[i - 1][j].marked && _game_board[i - 1][j].type != BlockEliminateType)
-				{
-					BlockPos pos;
-					pos.row = i - 1;
-					pos.col = j;
-
-					res_eliminate_list.push_back(pos);
-					_game_board[i - 1][j].marked = true;
-				}
-				if (!_game_board[i + 1][j].marked && _game_board[i + 1][j].type != BlockEliminateType)
-				{
-					BlockPos pos;
-					pos.row = i + 1;
-					pos.col = j;
-
-					res_eliminate_list.push_back(pos);
-					_game_board[i + 1][j].marked = true;
-				}
-			}
-
-			// ÅĞ¶Ï×óÓÒÊÇ·ñÏàÍ¬
-			if (j - 1 >= 0
-				&& _game_board[i][j - 1].type == _game_board[i][j].type
-				&& j + 1 < ColNum
-				&& _game_board[i][j + 1].type == _game_board[i][j].type)
-			{
-				// Ìí¼ÓÁ¬×ÅµÄºáÏòÈı¸ö
-				if (!_game_board[i][j].marked && _game_board[i][j].type != BlockEliminateType)
-				{
-					BlockPos pos;
-					pos.row = i;
-					pos.col = j;
-
-					res_eliminate_list.push_back(pos);
-					_game_board[i][j].marked = true;
-				}
-				if (!_game_board[i][j - 1].marked && _game_board[i][j - 1].type != BlockEliminateType)
-				{
-					BlockPos pos;
-					pos.row = i;
-					pos.col = j - 1;
-
-					res_eliminate_list.push_back(pos);
-					_game_board[i][j - 1].marked = true;
-				}
-				if (!_game_board[i][j + 1].marked && _game_board[i][j + 1].type != BlockEliminateType)
-				{
-					BlockPos pos;
-					pos.row = i;
-					pos.col = j + 1;
-
-					res_eliminate_list.push_back(pos);
-					_game_board[i][j + 1].marked = true;
-				}
-			}
-		}
-
-	return res_eliminate_list;
-}
-
-void GameScene::batchEliminate(const std::vector<BlockPos>& eliminate_list)
-{
-	// ²¥·ÅÏû³ıÒôĞ§
-	//SimpleAudioEngine::getInstance()->playEffect(PopEffect.c_str());
-
-	// ÇĞ»»blockÍ¼±ê£¬×÷ÎªÏû³ıÌØĞ§£¬È»ºóÏûÊ§
-	const Size visibleSize = Director::getInstance()->getVisibleSize();
-	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	float block_size = (visibleSize.width - LeftMargin - RightMargin) / ColNum;
-
-	for (auto& pos : eliminate_list)
-	{
-		std::string block_name = StringUtils::format("%d_%d", pos.row, pos.col);
-		Block* block = (Block*)(getChildByName(block_name));
-		_game_board[pos.row][pos.col].type = BlockEliminateType; // ±ê¼Ç³ÉÏû³ıÀàĞÍ
-		block->setTexture(EliminateStartImg); // ÉèÖÃ³ÉÏû³ıÍ¼±ê
-		block->setContentSize(Size(block_size, block_size)); // ÉèÖÃ³ß´ç
-		block->vanish();
-	}
-
-
-	// combo
-	std::string combo_text;
-	int len = eliminate_list.size();
-	//if (len >= 4)
-	//	SimpleAudioEngine::getInstance()->playEffect(UnbelievableEffect.c_str());
-
-	if (len == 4)
-		combo_text = ComboTextArray[0];
-	else if (len > 4 && len <= 6)
-		combo_text = ComboTextArray[1];
-	else if (len > 6)
-		combo_text = ComboTextArray[2];
-	_combo_label->setString(combo_text);
-	_combo_label->setVisible(true);
-	_combo_label->runAction(Sequence::create(MoveBy::create(0.5, Vec2(0, -50)), CallFunc::create([=]() {
-		_combo_label->setVisible(false);
-		_combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
-		}), NULL));
-
-	// ĞŞ¸Ä·ÖÊı
-	addScore(ScoreUnit * eliminate_list.size());
-
-	// ÏÂ½µ
-	scheduleOnce(CC_SCHEDULE_SELECTOR(GameScene::dropBlocks), 0.5);
-
-}
-BlockPos GameScene::checkGameHint()
-{
-	/***
-	´ıÓÅ»¯Ëã·¨
-	*/
-	// È«ÅÌÉ¨Ãè£¬³¢ÊÔÒÆ¶¯Ã¿¸öÔªËØµ½ËÄ¸ö·½Ïò£¬Èç¹û¶¼Ã»ÓĞ¿ÉÏû³ıµÄ£¬ÔòÓÎÏ·ÏİÈë½©¾Ö
-	return { 0,0 };
-}
 
 void GameScene::addScoreCallback(float dt)
 {
 	_animation_score++;
 	_score_label->setString(StringUtils::format("score: %d", _animation_score));
 
-	// ·ÖÊıÒÑ¾­Öğ¸öÔö¼Óµ½¼Ç·ÖÅÆ
+	// åˆ†æ•°å·²ç»é€ä¸ªå¢åŠ åˆ°è®°åˆ†ç‰Œ
 	if (_animation_score == _score)
 		unschedule(CC_SCHEDULE_SELECTOR(GameScene::addScoreCallback));
 }
 
 void GameScene::addScore(int delta_score)
 {
-	// »ñµÃ¼Ç·ÖÅÆ£¬¸üĞÂ·ÖÊı
+	// è·å¾—è®°åˆ†ç‰Œï¼Œæ›´æ–°åˆ†æ•°
 	_score += delta_score;
-	// ½øÈë¼Ó·Ö¶¯»­
+	// è¿›å…¥åŠ åˆ†åŠ¨ç”»
 	schedule(CC_SCHEDULE_SELECTOR(GameScene::addScoreCallback), 0.03);
 }
 
 void GameScene::tickProgress(float dt)
 {
-	// µ¹¼ÆÊ±
+	// å€’è®¡æ—¶
 	if (_progress_timer->getPercentage() > 0.0)
 		_progress_timer->setPercentage(_progress_timer->getPercentage() - 1.0);
 	else
@@ -701,101 +194,8 @@ void GameScene::tickProgress(float dt)
 		_combo_label->setVisible(true);
 		unschedule(CC_SCHEDULE_SELECTOR(GameScene::tickProgress));
 	}
-
 }
 
-void GameScene::update(float dt)
-{
-	// Çå³ı±ê¼Ç
-	if (_start_pos.row == -1 && _start_pos.col == -1
-		&& _end_pos.row == -1 && _end_pos.col == -1)
-		_is_can_elimate = EliminateInitFlag;
-
-	// Ã¿Ö¡¼ì²éÊÇ·ñ½©¾Ö,Èç¹û²»ÊÇ½©¾ÖÔòÏÔÊ¾µ±Ç°ÌáÊ¾
-	BlockPos game_hint_point = checkGameHint();
-	if (game_hint_point.row == -1 && game_hint_point.col == -1)
-	{
-		_combo_label->setString("dead game");
-		_combo_label->setVisible(true);
-	}
-	else
-		CCLOG("game hint point: row %d, col %d", game_hint_point.row, game_hint_point.col);
-
-}
-
-bool GameScene::onTouchBegan(Touch* touch, Event* event)
-{
-	// Ö»ÓĞÔÚ¿É´¥ÃşÌõ¼şÏÂ²Å¿ÉÒÔ²Ù×÷
-	if (_is_can_touch)
-	{
-		// ¼ÇÂ¼¿ªÊ¼´¥ÃşµÄblock×ø±ê
-		_start_pos = getBlockPosByCoordinate(touch->getLocation().x, touch->getLocation().y);
-
-		// Ã¿´Î´¥ÅöËãÒ»´ÎĞÂµÄÒÆ¶¯¹ı³Ì
-		_is_moving = true;
-	}
-
-	return true;
-
-}
-
-void GameScene::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event)
-{
-
-	// Ö»ÓĞÔÚ¿É´¥ÃşÌõ¼şÏÂ²Å¿ÉÒÔ²Ù×÷
-	if (_is_can_touch)
-	{
-		// ¸ù¾İ´¥Ãş»¬¶¯µÄ·½ÏòÀ´½»»»block
-
-		// ¼ÆËãÏà¶ÔÎ»ÒÆ£¬ÍÏ×§¾«Áé£¬×¢Òâ·¶Î§
-		if (_start_pos.row > -1 && _start_pos.row < RowNum
-			&& _start_pos.col > -1 && _start_pos.col < ColNum)
-		{
-			// Í¨¹ıÅĞ¶ÏÒÆ¶¯ºó´¥ÃşµãµÄÎ»ÖÃÔÚÄÄ¸ö·¶Î§À´¾ö¶¨ÒÆ¶¯µÄ·½Ïò
-			Vec2 cur_loacation = touch->getLocation();
-
-			// ´¥ÃşµãÖ»»ñÈ¡Ò»´Î£¬·ÀÖ¹¿ç¸ñ»¥»»
-			if (_end_pos.row == -1 && _end_pos.col == -1
-				|| _end_pos.row == _start_pos.row && _end_pos.col == _start_pos.col)
-				_end_pos = getBlockPosByCoordinate(cur_loacation.x, cur_loacation.y);
-
-			if (_is_moving)
-			{
-				// ¸ù¾İÆ«ÒÆ·½Ïò½»»»¾«Áé
-				bool is_need_swap = false;
-
-				if (_start_pos.col + 1 == _end_pos.col && _start_pos.row == _end_pos.row) // Ë®Æ½ÏòÓÒ
-					is_need_swap = true;
-				else if (_start_pos.col - 1 == _end_pos.col && _start_pos.row == _end_pos.row) // Ë®Æ½Ïò×ó
-					is_need_swap = true;
-				else if (_start_pos.row + 1 == _end_pos.row && _start_pos.col == _end_pos.col) // ÊúÖ±ÏòÉÏ
-					is_need_swap = true;
-				else if (_start_pos.row - 1 == _end_pos.row && _start_pos.col == _end_pos.col) // ÊúÖ±ÏòÏÂ
-					is_need_swap = true;
-
-				if (is_need_swap
-
-					/***
-					&&!TrySwap(p1, p2)) 
-						*/
-					){
-					// Ö´ĞĞ½»»»
-
-					swapBlocks(_start_pos, _end_pos);
-
-					// »Ø¹é·ÇÒÆ¶¯×´Ì¬
-					_is_moving = false;
-				}
-			}
-
-		}
-	}
-}
-
-void GameScene::onTouchEnded(Touch* touch, Event* event)
-{
-	_is_moving = false;
-}
 
 void GameScene::onEnter()
 {
