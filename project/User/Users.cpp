@@ -39,12 +39,12 @@ int Users::reg(string uname, string password1, string password2) {//102注册成
 	if (users.size() != 0) {
 		return 202;//用户名已经被注册
 	}
-	else if (password1 == password2) {
+	else if (password1 ！= password2) {
 		return 203;//两次密码不同
 	}else {
 		user u = { uname,password1,0 };
 		storage.insert(u);
-		return 201;//注册成功
+		return 102;//注册成功
 	}
 }
 
@@ -56,12 +56,13 @@ int Users::modifyPassword(string uname, string password, string password1, strin
 	else if (users[0].password != password){
 		return 205;//密码不正确
 	}
-	else if (password1 == password2) {
+	else if (password1 ！= password2) {
 		return 203;//两次密码不同
 	}
 	else {
 		user u =  { uname,password1,users[0].point };
 		storage.replace(u);
+		return 103;//修改密码成功
 	}
 	
 }
