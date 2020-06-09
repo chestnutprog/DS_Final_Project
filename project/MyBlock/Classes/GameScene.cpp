@@ -119,6 +119,7 @@ bool GameScene::init()
 	//添加触摸事件监听
 	EventListenerTouchOneByOne *touch_listener = EventListenerTouchOneByOne::create();
 	touch_listener->onTouchBegan = [&](Touch* touch, Event* event) {
+		log("lets's see what happened");
 		auto target = static_cast<Sprite*>(event->getCurrentTarget());
 		Vec2 locationInNode = target->convertToNodeSpace(touch->getLocation());
 
@@ -139,6 +140,9 @@ bool GameScene::init()
 	touch_listener->onTouchMoved = [&](Touch* touch, Event* event) {
 		if (!moved && touch->getLocation().distance(touch->getStartLocation()) > _blocks.block_size * 0.4) {
 			moved=1;
+			cant_touch++;
+			log("ani start!");
+			auto after_swap = [&]() {log("ani finished!"); cant_touch--; };
 			auto direction_vec = touch->getLocation() - touch->getStartLocation();
 			direction_vec.rotate(Vec2(), _PI / 4);
 			auto angle = atan2(direction_vec.x, direction_vec.y);
@@ -146,7 +150,7 @@ bool GameScene::init()
 			
 			int block_col = floor((touch->getStartLocation().x - _blocks.LeftMargin) / _blocks.block_size);
 			int block_row = floor((touch->getStartLocation().y - _blocks.ButtomMargin) / _blocks.block_size);
-			_blocks.swap(block_row, block_col, direction);
+			_blocks.swap(block_row, block_col, direction, CallbackWaitAll::create(after_swap));
 		}
 	};
 

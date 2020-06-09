@@ -22,7 +22,7 @@ bool Blocks::try_swap(int row, int col, int direction)
     std::swap(blocks[row][col], blocks[row + op.first][col + op.second]);
     return !result.empty();
 }
-bool Blocks::swap(int row, int col, int direction)
+bool Blocks::swap(int row, int col, int direction, shared_ptr<CallbackWaitAll> _counter)
 {
     // if after swap (x,y) could crash, then swap (x,y)
     // else don't do operations on blocks.
@@ -32,11 +32,11 @@ bool Blocks::swap(int row, int col, int direction)
 
     log("swap %d %d %d", row, col, direction);
 
-    ((GameScene&)_father).cant_touch++;
     auto&& result = try_swap(row, col, direction);
-
     {
-        auto counter = make_shared<CallbackWaitAll>([&]() {crash(); });
+        auto _swap_finish_counter = CallbackWaitAll::create([_counter]() {log("whole swap finished"); _counter; });
+        auto counter = CallbackWaitAll::create([=]() {log("swap finished"); crash(_swap_finish_counter); });
+
         if (result)
         {
             std::swap(blocks[row][col], blocks[row + op.first][col + op.second]);
@@ -47,7 +47,7 @@ bool Blocks::swap(int row, int col, int direction)
             blocks[row + op.first][col + op.second]->swapTo({ row , col }, false, counter);
             blocks[row][col]->swapTo({ row + op.first, col + op.second }, false, counter);
         }
-        ((GameScene&)_father).cant_touch--;
+        
     }
 
     return 0;//return result;
@@ -168,17 +168,21 @@ vector<tuple<int, int, bool>> Blocks::solutions()
 
 // Block (oldposition x, y) (new position x,y)
 // this is a helper function to calc animation;
-void Blocks::crash()
+void Blocks::crash(shared_ptr<CallbackWaitAll> _counter)
 {
-
-    auto _after_vanish = [&]() {
-        function<void(void)> _cb = [&]() {
+    auto _after_vanish = [&, _counter]() {
+        function<void(void)> _cb = [=]() {
             if (try_crash().size()) {
-                crash();
+                crash(_counter);
             }
+            else {
+                log("crash finished");
+            }
+            _counter;
         };
         {
-            auto counter = make_shared<CallbackWaitAll>(_cb);
+            log("after vanish start");
+            auto counter = CallbackWaitAll::create(_cb);
             BaseBlock* new_blocks[width][height];
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
@@ -195,6 +199,7 @@ void Blocks::crash()
                         blocks[i][j]->dropTo({ i,j }, counter);
                     }
                 }
+            log("after vanish finished");
         }
     };
     {

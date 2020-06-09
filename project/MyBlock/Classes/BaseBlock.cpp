@@ -40,37 +40,34 @@ bool BaseBlock::init()
     return true;
 }
 
-void BaseBlock::dropTo(pos_t pos, shared_ptr<CallbackWaitAll> counter) {
-    ((GameScene&)(_blocks._father)).cant_touch++;
+void BaseBlock::dropTo(pos_t pos, CallbackWaitAll_counter counter) {
     position = pos;
     setPosition(Blocks::LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (position.real() + 1) * _blocks.block_size);
     auto real_position = Vec2(Blocks::LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (position.real() + 0.5) * _blocks.block_size);
-    runAction(Sequence::create(MoveTo::create(0.2, real_position), CallFunc::create([&]() {((GameScene&)(_blocks._father)).cant_touch--; }), CallFunc::create([counter]() {}), nullptr));
+    runAction(Sequence::create(MoveTo::create(0.2, real_position), CallFunc::create([counter]() {}), nullptr));
 }
 
-void BaseBlock::swapTo(pos_t pos, int flag, shared_ptr<CallbackWaitAll> counter) {
-    ((GameScene&)(_blocks._father)).cant_touch++;
+void BaseBlock::swapTo(pos_t pos, int flag, CallbackWaitAll_counter counter) {
     auto old_position = Vec2(Blocks::LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (position.real() + 0.5) * _blocks.block_size);
     auto real_position = Vec2(Blocks::LeftMargin + (pos.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (pos.real() + 0.5) * _blocks.block_size);
     if (flag) {
         position = pos;
-        runAction(Sequence::create(MoveTo::create(0.2, real_position), CallFunc::create([&]() {((GameScene&)(_blocks._father)).cant_touch--; }), CallFunc::create([counter]() {}),nullptr));
+        runAction(Sequence::create(MoveTo::create(0.2, real_position), CallFunc::create([counter]() {counter; }), nullptr));
         //runAction(Sequence::create(MoveTo::create(0.2, real_position), MoveTo::create(0.2, old_position), CallFunc::create([&]() {((GameScene&)(_blocks._father)).cant_touch--; }), nullptr));
     }
     else {
-        runAction(Sequence::create(MoveTo::create(0.2, real_position), MoveTo::create(0.2, old_position), CallFunc::create([&]() {((GameScene&)(_blocks._father)).cant_touch--; }), CallFunc::create([counter]() {}), nullptr));
+        runAction(Sequence::create(MoveTo::create(0.2, real_position), MoveTo::create(0.2, old_position), CallFunc::create([counter]() {counter; }), nullptr));
     }
 }
 
 
-void BaseBlock::vanish(shared_ptr<CallbackWaitAll> counter)
+void BaseBlock::vanish(CallbackWaitAll_counter counter)
 {
     // 延时显示动画
     setTexture("images/star.png");
     setContentSize(Size(_blocks.block_size, _blocks.block_size));
-    ScaleTo *scale_to = ScaleTo::create(0.2, 0.5);
-    CallFunc *funcall = CallFunc::create([&]() { vanishCallback(); });
-    Sequence* sequence = Sequence::create(DelayTime::create(0.2), scale_to, CallFunc::create([counter]() {}), funcall, nullptr);
+    ScaleTo* scale_to = ScaleTo::create(0.2, 0.5);
+    Sequence* sequence = Sequence::create(DelayTime::create(0.2), scale_to, CallFunc::create([counter]() {counter; }), CallFunc::create([&]() { vanishCallback(); }), nullptr);
     runAction(sequence);
 }
 
