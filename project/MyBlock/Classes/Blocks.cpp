@@ -7,6 +7,10 @@
 #include "GameScene.h"
 #include "CallbackWaitAll.h"
 using namespace std;
+
+// 消除分数单位
+const int ScoreUnit = 100;
+
 // left up right down (in ui)
 // left down right up (in [])
 const pair<int, int> directions[] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
@@ -35,7 +39,7 @@ bool Blocks::swap(int row, int col, int direction, shared_ptr<CallbackWaitAll> _
     auto&& result = try_swap(row, col, direction);
     {
         auto _swap_finish_counter = CallbackWaitAll::create([_counter]() {log("whole swap finished"); _counter; });
-        auto counter = CallbackWaitAll::create([=]() {log("swap finished"); crash(_swap_finish_counter); });
+        auto counter = CallbackWaitAll::create([=]() {log("swap finished"); crash(0,_swap_finish_counter); });
 
         if (result)
         {
@@ -54,11 +58,8 @@ bool Blocks::swap(int row, int col, int direction, shared_ptr<CallbackWaitAll> _
 }
 vector<pair<int, int>> Blocks::try_crash()
 {
-    bool v[height][width];
-    int c[height][width];
-
-    memset(v, 0, sizeof(v));
-    memset(c, 0, sizeof(c));
+    vector<vector<bool>> v(height, vector<bool>(width));
+    vector<vector<int>> c(height, vector<int>(width));
 
     for (int i = 0; i < height; i++)
         for (int j = 0; j < width; j++)
@@ -91,7 +92,9 @@ vector<pair<int, int>> Blocks::try_crash()
         }
     }
 
-    memset(c, 0, sizeof(c));
+    for (auto& row : c)
+        fill(row.begin(), row.end(), 0);
+
     for (int j = 0; j < width; j++)
         for (int i = 0; i < height; i++)
             if (i == 0)
@@ -168,12 +171,12 @@ vector<tuple<int, int, bool>> Blocks::solutions()
 
 // Block (oldposition x, y) (new position x,y)
 // this is a helper function to calc animation;
-void Blocks::crash(shared_ptr<CallbackWaitAll> _counter)
+void Blocks::crash(int depth, shared_ptr<CallbackWaitAll> _counter)
 {
-    auto _after_vanish = [&, _counter]() {
+    auto _after_vanish = [this,depth,_counter]() {
         function<void(void)> _cb = [=]() {
             if (try_crash().size()) {
-                crash(_counter);
+                crash(depth + 1, _counter);
             }
             else {
                 log("crash finished");
@@ -183,17 +186,18 @@ void Blocks::crash(shared_ptr<CallbackWaitAll> _counter)
         {
             log("after vanish start");
             auto counter = CallbackWaitAll::create(_cb);
-            BaseBlock* new_blocks[width][height];
+            vector<vector<BaseBlock*>> new_blocks(width, vector<BaseBlock*>(height));
+            //BaseBlock* new_blocks[width][height];
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
                     new_blocks[j][i] = blocks[i][j];
-            int pos[width];
+            vector<int> pos(width);
             for (int j = 0; j < width; j++)
-                pos[j] = std::remove(new_blocks[j], new_blocks[j] + height, nullptr) - new_blocks[j];
+                pos[j] = std::remove(new_blocks[j].begin(), new_blocks[j].end(), nullptr) - new_blocks[j].begin();
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++) {
                     if (i >= pos[j])
-                        new_blocks[j][i] = BaseBlock::create(*this, rand() % 6, { i,j }), _father.addChild(new_blocks[j][i], 1);
+                        new_blocks[j][i] = BaseBlock::create(*this, rand() % 6, { i,j }), _father.game_layer->addChild(new_blocks[j][i], 1);
                     if (new_blocks[j][i] != blocks[i][j]) {
                         blocks[i][j] = new_blocks[j][i];
                         blocks[i][j]->dropTo({ i,j }, counter);
@@ -205,6 +209,8 @@ void Blocks::crash(shared_ptr<CallbackWaitAll> _counter)
     {
         auto counter = make_shared<CallbackWaitAll>(_after_vanish);
         vector<pair<int, int>> result = try_crash();
+        int score = result.size() * (depth + 1) * ScoreUnit;
+        ((GameScene&)_father).addScore(score);
         for (auto i : result) {
             blocks[i.first][i.second]->vanish(counter); //= BaseBlock::create(*this, 1, {i.first, i.second});
             blocks[i.first][i.second] = nullptr;
@@ -217,4 +223,18 @@ void Blocks::crash(shared_ptr<CallbackWaitAll> _counter)
 int Blocks::getColor(int x, int y)
 {
     return blocks[x][y]->color;
+}
+
+Blocks::Blocks(GameScene& father) : _father{ father }
+{
+    const Size visibleSize = Director::getInstance()->getVisibleSize();
+    block_size = (visibleSize.width - LeftMargin - RightMargin) / width;
+    do {
+        for (int i = 0; i < height; i++)
+            for (int j = 0; j < width; j++)
+                blocks[i][j] = BaseBlock::create(*this, rand() % 6, { i, j });
+    } while (try_crash().size());
+    for (int i = 0; i < height; i++)
+        for (int j = 0; j < width; j++)
+            _father.game_layer->addChild(blocks[i][j], 1);
 }

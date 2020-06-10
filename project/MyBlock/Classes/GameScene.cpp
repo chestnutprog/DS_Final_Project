@@ -1,20 +1,18 @@
 #include "AudioEngine.h"
 #include "GameScene.h"
-#include "block.h"
 #include <cmath>
 #include <algorithm>
-
+#include "PostProcess.h"
 
 const double _PI = 2 * acos(0);
 
 USING_NS_CC;
-//using namespace CocosDenshion;
 
 //场景层次
 const int BackGroundLevel = 0; // 背景层
 const int GameBoardLevel = 1;  // 实际的游戏操作层
 const int FlashLevel = 3;	   // 显示combo的动画层
-const int MenuLevel = 5;	   // 菜单层
+const int MenuLevel = 10;	   // 菜单层
 
 // combo文字
 const std::vector<std::string> ComboTextArray{
@@ -28,47 +26,24 @@ const std::string WelcomeEffect = "sounds/welcome.mp3";
 const std::string PopEffect = "sounds/pop.mp3";
 const std::string UnbelievableEffect = "sounds/unbelievable.mp3";
 
-// 消除分数单位
-const int ScoreUnit = 10;
 
 // 消除时候类型和效果
-const int BlockEliminateType = 10; //block为消除状态时的type
-const std::string EliminateStartImg = "images/star.png";
+//const std::string EliminateStartImg = "images/star.png";
 
-// 界面边距
-const float LeftMargin = 20;
-const float RightMargin = 20;
-const float BottonMargin = 70;
-
-// block行列数
-const int RowNum = 8;
-const int ColNum = 8;
-
-// 计数已交换block
-const int EliminateInitFlag = 0;
-const int EliminateOneReadyFlag = 1;
-const int EliminateTwoReadyFlag = 2;
-
-//获得随机block
-int getRandomSpriteIndex(int len)
-{
-	return rand() % len;
-}
 
 // 实例化主场景和层
-Scene *GameScene::createScene()
+Scene* GameScene::createScene()
 {
-	Scene *game_scene = Scene::create();
-	Layer* game_layer = GameScene::create();
-	game_scene->addChild(game_layer);
+	Scene* game_scene = GameScene::create();
 	return game_scene;
 }
 
 // 初始化游戏场景
 bool GameScene::init()
 {
-	if (!Layer::init())
+	if (!Scene::init())
 		return false;
+
 
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -78,15 +53,16 @@ bool GameScene::init()
 	game_background->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
 	addChild(game_background, BackGroundLevel);
 
+	addChild(game_layer,1);
 	// 初始化游戏分数
 	_score = 0;
 	_animation_score = 0;
 
-	_score_label = Label::createWithTTF(StringUtils::format("score: %d", _score), "fonts/Marker Felt.ttf", 20);
+	_score_label = Label::createWithTTF(StringUtils::format("score: %d", _score), "fonts/Marker Felt.ttf", 40);
 	_score_label->setTextColor(cocos2d::Color4B::YELLOW);
 	_score_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.9);
 	_score_label->setName("score");
-	addChild(_score_label, BackGroundLevel); // 将记分牌加入背景层
+	addChild(_score_label, 2); // 将记分牌加入背景层
 
 	// 倒计时时间条
 	_progress_timer = ProgressTimer::create(Sprite::create("images/progress_bar.png")); //创建一个倒计时时间条
@@ -100,8 +76,7 @@ bool GameScene::init()
 
 	// 播放音效
 	AudioEngine::play2d(BackgourndMusic.c_str(), true, 1.0f);
-	//SimpleAudioEngine::getInstance()->playBackgroundMusic(, true);
-	//SimpleAudioEngine::getInstance()->playEffect(WelcomeEffect.c_str());
+	AudioEngine::play2d(WelcomeEffect.c_str());
 
 	// 添加combo文字
 	_combo_label = Label::createWithTTF(StringUtils::format("Ready Go"), "fonts/Marker Felt.ttf", 40);
@@ -124,8 +99,8 @@ bool GameScene::init()
 		Vec2 locationInNode = target->convertToNodeSpace(touch->getLocation());
 
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
-		Rect rect = Rect(_blocks.LeftMargin, _blocks.ButtomMargin, visibleSize.width - _blocks.LeftMargin - _blocks.RightMargin, _blocks.block_size * _blocks.height);
-		//log("%f %f %f %f", _blocks.LeftMargin, _blocks.ButtomMargin, visibleSize.width - _blocks.LeftMargin - _blocks.RightMargin, _blocks.block_size * _blocks.height);
+		Rect rect = Rect(_blocks.LeftMargin, _blocks.BottomMargin, visibleSize.width - _blocks.LeftMargin - _blocks.RightMargin, _blocks.block_size * _blocks.height);
+		//log("%f %f %f %f", _blocks.LeftMargin, _blocks.BottomMargin, visibleSize.width - _blocks.LeftMargin - _blocks.RightMargin, _blocks.block_size * _blocks.height);
 		//log("%d", cant_touch);
 		if (!cant_touch && rect.containsPoint(locationInNode))
 		{
@@ -139,17 +114,16 @@ bool GameScene::init()
 
 	touch_listener->onTouchMoved = [&](Touch* touch, Event* event) {
 		if (!moved && touch->getLocation().distance(touch->getStartLocation()) > _blocks.block_size * 0.4) {
-			moved=1;
+			moved = 1;
 			cant_touch++;
-			log("ani start!");
-			auto after_swap = [&]() {log("ani finished!"); cant_touch--; };
+			auto after_swap = [&]() {cant_touch--; };
 			auto direction_vec = touch->getLocation() - touch->getStartLocation();
 			direction_vec.rotate(Vec2(), _PI / 4);
 			auto angle = atan2(direction_vec.x, direction_vec.y);
-			int direction = std::max(std::min(int(floor(angle * 2 / _PI)) + 2,3),0);
-			
+			int direction = std::max(std::min(int(floor(angle * 2 / _PI)) + 2, 3), 0);
+
 			int block_col = floor((touch->getStartLocation().x - _blocks.LeftMargin) / _blocks.block_size);
-			int block_row = floor((touch->getStartLocation().y - _blocks.ButtomMargin) / _blocks.block_size);
+			int block_row = floor((touch->getStartLocation().y - _blocks.BottomMargin) / _blocks.block_size);
 			_blocks.swap(block_row, block_col, direction, CallbackWaitAll::create(after_swap));
 		}
 	};
@@ -161,6 +135,18 @@ bool GameScene::init()
 	};
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this); // 父类的 _eventDispatcher
 
+	m_blurX_PostProcessLayer = PostProcess::create("shader/blur.vert", "shader/blur.frag");
+	m_blurX_PostProcessLayer->setAnchorPoint(Point::ZERO);
+	m_blurX_PostProcessLayer->setPosition(Point::ZERO);
+	
+	this->addChild(m_blurX_PostProcessLayer, 5);
+
+	// blur y layer
+	m_blurY_PostProcessLayer = PostProcess::create("shader/blur.vert", "shader/blur.frag");
+	m_blurY_PostProcessLayer->setAnchorPoint(Point::ZERO);
+	m_blurY_PostProcessLayer->setPosition(Point::ZERO);
+	this->addChild(m_blurY_PostProcessLayer, 6);
+
 	// 默认定时器按帧更新
 	scheduleUpdate();
 
@@ -171,7 +157,7 @@ bool GameScene::init()
 
 void GameScene::addScoreCallback(float dt)
 {
-	_animation_score++;
+	_animation_score += min(rand() % 10, _score - _animation_score);
 	_score_label->setString(StringUtils::format("score: %d", _animation_score));
 
 	// 分数已经逐个增加到记分牌
@@ -183,6 +169,7 @@ void GameScene::addScore(int delta_score)
 {
 	// 获得记分牌，更新分数
 	_score += delta_score;
+	log("real_score: %d", _score);
 	// 进入加分动画
 	schedule(CC_SCHEDULE_SELECTOR(GameScene::addScoreCallback), 0.03);
 }
@@ -201,12 +188,22 @@ void GameScene::tickProgress(float dt)
 }
 
 
-void GameScene::onEnter()
-{
-	Layer::onEnter();
-}
+void GameScene::update(float dt) {
+	// blur in X direction
+	const Size visibleSize = Director::getInstance()->getVisibleSize();
+	auto& blurXstate = m_blurX_PostProcessLayer->ProgramState();
+	auto blurOffset = Vec2(1.0f / visibleSize.width, 0.0);
+	float blurStrength = 1.0f;
+	blurXstate.setUniform(blurXstate.getUniformLocation("u_blurOffset"), &blurOffset,sizeof(blurOffset));
+	blurXstate.setUniform(blurXstate.getUniformLocation("u_blurStrength"), &blurStrength,sizeof(blurStrength));
 
-void GameScene::onExit()
-{
-	Layer::onExit();
+	m_blurX_PostProcessLayer->draw(game_layer);
+
+	// blur in Y direction
+	auto blurOffsetY = Vec2(0.0, 1.0f / visibleSize.height);
+	auto& blurYstate = m_blurY_PostProcessLayer->ProgramState();
+	blurYstate.setUniform(blurYstate.getUniformLocation("u_blurOffset"), &blurOffsetY, sizeof(blurOffsetY));
+	blurYstate.setUniform(blurYstate.getUniformLocation("u_blurStrength"), &blurStrength, sizeof(blurStrength));
+
+	m_blurY_PostProcessLayer->draw(m_blurX_PostProcessLayer);
 }

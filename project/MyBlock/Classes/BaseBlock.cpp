@@ -35,21 +35,21 @@ bool BaseBlock::init()
         return false;
     }
     setContentSize(Size(_blocks.block_size, _blocks.block_size));
-    setPosition(Blocks::LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (position.real() + 0.5) * _blocks.block_size);
+    setPosition(_blocks.LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.BottomMargin + (position.real() + 0.5) * _blocks.block_size);
     //scheduleOnce(CC_SCHEDULE_SELECTOR(Block::appearSchedule), 0.3);
     return true;
 }
 
 void BaseBlock::dropTo(pos_t pos, CallbackWaitAll_counter counter) {
     position = pos;
-    setPosition(Blocks::LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (position.real() + 1) * _blocks.block_size);
-    auto real_position = Vec2(Blocks::LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (position.real() + 0.5) * _blocks.block_size);
+    setPosition(_blocks.LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.BottomMargin + (position.real() + 1) * _blocks.block_size);
+    auto real_position = Vec2(_blocks.LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.BottomMargin + (position.real() + 0.5) * _blocks.block_size);
     runAction(Sequence::create(MoveTo::create(0.2, real_position), CallFunc::create([counter]() {}), nullptr));
 }
 
 void BaseBlock::swapTo(pos_t pos, int flag, CallbackWaitAll_counter counter) {
-    auto old_position = Vec2(Blocks::LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (position.real() + 0.5) * _blocks.block_size);
-    auto real_position = Vec2(Blocks::LeftMargin + (pos.imag() + 0.5) * _blocks.block_size, _blocks.ButtomMargin + (pos.real() + 0.5) * _blocks.block_size);
+    auto old_position = Vec2(_blocks.LeftMargin + (position.imag() + 0.5) * _blocks.block_size, _blocks.BottomMargin + (position.real() + 0.5) * _blocks.block_size);
+    auto real_position = Vec2(_blocks.LeftMargin + (pos.imag() + 0.5) * _blocks.block_size, _blocks.BottomMargin + (pos.real() + 0.5) * _blocks.block_size);
     if (flag) {
         position = pos;
         runAction(Sequence::create(MoveTo::create(0.2, real_position), CallFunc::create([counter]() {counter; }), nullptr));
