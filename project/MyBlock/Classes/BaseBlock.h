@@ -1,12 +1,11 @@
 #pragma once
 #include <string>
 #include <cstdlib>
-#include <complex>
 #include <memory>
 #include "cocos2d.h"
 #include "CallbackWaitAll.h"
 using namespace std;
-using pos_t = std::complex<int>;
+using pos_t = std::pair<int, int>;
 class Blocks;
 class BaseBlock : public cocos2d::Sprite
 {
@@ -23,8 +22,8 @@ public:
 
     static BaseBlock* create(Blocks& _blocks, int color, pos_t pos);
 
-    void dropTo(pos_t pos, shared_ptr<CallbackWaitAll> counter);
-    void swapTo(pos_t pos, int flag, shared_ptr<CallbackWaitAll> counter);
-    void vanish(shared_ptr<CallbackWaitAll> counter);
+    void dropTo(pos_t pos, CallbackWaitAll_counter counter);
+    void swapTo(pos_t pos, int flag, CallbackWaitAll_counter counter);
+    void vanish(CallbackWaitAll_counter counter);
     void vanishCallback();
 };

@@ -8,7 +8,7 @@
 #include "CallbackWaitAll.h"
 using namespace std;
 
-// 消除分数单位
+// 娑堥櫎鍒嗘暟鍗曚綅
 const int ScoreUnit = 100;
 
 // left up right down (in ui)

@@ -11,7 +11,7 @@ USING_NS_CC;
 //场景层次
 const int BackGroundLevel = 0; // 背景层
 const int GameBoardLevel = 1;  // 实际的游戏操作层
-const int FlashLevel = 3;	   // 显示combo的动画层
+const int FlashLevel = 9;	   // 显示combo的动画层
 const int MenuLevel = 10;	   // 菜单层
 
 // combo文字
@@ -83,12 +83,15 @@ bool GameScene::init()
 	_combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
 	addChild(_combo_label, FlashLevel);
 
-	_combo_label->runAction(Sequence::create(DelayTime::create(0.8), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
-												 // 准备动画出现
-												 _combo_label->setVisible(false);																 //准备动画隐藏
-												 _combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2); //连击动画位置
-											 }),
-											 NULL));
+	_combo_label->runAction(Sequence::create(DelayTime::create(0.8),
+		MoveBy::create(0.3, Vec2(200, 0)),
+		CallFunc::create([=]() {
+			_masked = false;
+			// 准备动画出现
+			_combo_label->setVisible(false);																 //准备动画隐藏
+			_combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2); //连击动画位置
+			}),
+		NULL));
 	//动画动作序列Sequence：label->runAction(Sequence::create(MoveBy::create(1, Point(100,100)), RotateBy::create(1, 360),NULL));
 
 	//添加触摸事件监听
@@ -100,9 +103,7 @@ bool GameScene::init()
 
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
 		Rect rect = Rect(_blocks.LeftMargin, _blocks.BottomMargin, visibleSize.width - _blocks.LeftMargin - _blocks.RightMargin, _blocks.block_size * _blocks.height);
-		//log("%f %f %f %f", _blocks.LeftMargin, _blocks.BottomMargin, visibleSize.width - _blocks.LeftMargin - _blocks.RightMargin, _blocks.block_size * _blocks.height);
-		//log("%d", cant_touch);
-		if (!cant_touch && rect.containsPoint(locationInNode))
+		if (!_masked && !cant_touch && rect.containsPoint(locationInNode))
 		{
 			log("sprite began... x = %f, y = %f", locationInNode.x, locationInNode.y);
 			cant_touch++;
@@ -135,6 +136,9 @@ bool GameScene::init()
 	};
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this); // 父类的 _eventDispatcher
 
+
+	_masked = true;
+	// Blur X Layer
 	m_blurX_PostProcessLayer = PostProcess::create("shader/blur.vert", "shader/blur.frag");
 	m_blurX_PostProcessLayer->setAnchorPoint(Point::ZERO);
 	m_blurX_PostProcessLayer->setPosition(Point::ZERO);
@@ -189,21 +193,29 @@ void GameScene::tickProgress(float dt)
 
 
 void GameScene::update(float dt) {
-	// blur in X direction
-	const Size visibleSize = Director::getInstance()->getVisibleSize();
-	auto& blurXstate = m_blurX_PostProcessLayer->ProgramState();
-	auto blurOffset = Vec2(1.0f / visibleSize.width, 0.0);
-	float blurStrength = 1.0f;
-	blurXstate.setUniform(blurXstate.getUniformLocation("u_blurOffset"), &blurOffset,sizeof(blurOffset));
-	blurXstate.setUniform(blurXstate.getUniformLocation("u_blurStrength"), &blurStrength,sizeof(blurStrength));
-
-	m_blurX_PostProcessLayer->draw(game_layer);
-
-	// blur in Y direction
-	auto blurOffsetY = Vec2(0.0, 1.0f / visibleSize.height);
-	auto& blurYstate = m_blurY_PostProcessLayer->ProgramState();
-	blurYstate.setUniform(blurYstate.getUniformLocation("u_blurOffset"), &blurOffsetY, sizeof(blurOffsetY));
-	blurYstate.setUniform(blurYstate.getUniformLocation("u_blurStrength"), &blurStrength, sizeof(blurStrength));
-
-	m_blurY_PostProcessLayer->draw(m_blurX_PostProcessLayer);
+	Scene::update(dt);
+	if (_masked) {
+		// blur in X direction
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		auto& blurXstate = m_blurX_PostProcessLayer->ProgramState();
+		auto blurOffset = Vec2(1.0f / visibleSize.width, 0.0);
+		float blurStrength = 1.0f;
+		blurXstate.setUniform(blurXstate.getUniformLocation("u_blurOffset"), &blurOffset, sizeof(blurOffset));
+		blurXstate.setUniform(blurXstate.getUniformLocation("u_blurStrength"), &blurStrength, sizeof(blurStrength));
+		m_blurX_PostProcessLayer->setVisible(false);
+		m_blurX_PostProcessLayer->draw(game_layer);
+		
+		// blur in Y direction
+		auto blurOffsetY = Vec2(0.0, 1.0f / visibleSize.height);
+		auto& blurYstate = m_blurY_PostProcessLayer->ProgramState();
+		blurYstate.setUniform(blurYstate.getUniformLocation("u_blurOffset"), &blurOffsetY, sizeof(blurOffsetY));
+		blurYstate.setUniform(blurYstate.getUniformLocation("u_blurStrength"), &blurStrength, sizeof(blurStrength));
+		m_blurY_PostProcessLayer->setVisible(true);
+		m_blurY_PostProcessLayer->draw(m_blurX_PostProcessLayer);
+		
+	}
+	else {
+		m_blurX_PostProcessLayer->setVisible(false);
+		m_blurY_PostProcessLayer->setVisible(false);
+	}
 }

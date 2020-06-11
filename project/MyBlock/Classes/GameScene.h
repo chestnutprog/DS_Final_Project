@@ -23,6 +23,7 @@ public:
 private:
 	int _score;			  // 得分
 	int _animation_score; // 显示在记分牌的分数
+	bool _masked;		  // Game Layer's mask
 
 	cocos2d::Label *_score_label;
 	cocos2d::ProgressTimer *_progress_timer; // 倒计时时间条
