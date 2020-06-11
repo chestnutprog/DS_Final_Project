@@ -1,5 +1,6 @@
 #include "Client.h"
 #include <sstream>
+Client* Client::_instance = new Client();
 const string baseUrl = "http://mirror.bjtu.edu.cn/se_homework/";
 void Client::login(string username, string password, function<void(bool, string)> _cb) {
 	HttpRequest* request = new (std::nothrow) HttpRequest();

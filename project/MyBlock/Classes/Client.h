@@ -14,14 +14,11 @@ private:
     Client() {};
 public:
     static Client* getInstance() {
-        if (_instance == nullptr) {
-            _instance = new Client();
-        }
         return _instance;
     };
     void login(string username, string password, function<void(bool, string)>);
     void reg(string username, string password, function<void(bool, string)>);
     void updatePassword(string oldPassword, string newPassword, function<void(bool, string)>);
     void ranklist(function<void(bool, string, vector<pair<string, int>>)> _cb);
-    void  updateScore(int newScore, function<void(bool, string)>_cb);
+    void updateScore(int newScore, function<void(bool, string)>_cb);
 };
