@@ -3,6 +3,8 @@
 #include <cmath>
 #include <algorithm>
 #include "PostProcess.h"
+#include "Client.h"
+#include "MenuScene.h"
 
 const double _PI = 2 * acos(0);
 
@@ -26,11 +28,6 @@ const std::string WelcomeEffect = "sounds/welcome.mp3";
 const std::string PopEffect = "sounds/pop.mp3";
 const std::string UnbelievableEffect = "sounds/unbelievable.mp3";
 
-
-// 消除时候类型和效果
-//const std::string EliminateStartImg = "images/star.png";
-
-
 // 实例化主场景和层
 Scene* GameScene::createScene()
 {
@@ -44,7 +41,7 @@ bool GameScene::init()
 	if (!Scene::init())
 		return false;
 
-
+	Client::getInstance();
 	const Size visibleSize = Director::getInstance()->getVisibleSize();
 	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -58,8 +55,7 @@ bool GameScene::init()
 	_score = 0;
 	_animation_score = 0;
 
-	_score_label = Label::createWithTTF(StringUtils::format("score: %d", _score), "fonts/Marker Felt.ttf", 40);
-	_score_label->setTextColor(cocos2d::Color4B::YELLOW);
+	_score_label = Label::createWithBMFont("fonts/west_england-64.fnt",StringUtils::format("score: %d", _score));
 	_score_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.9);
 	_score_label->setName("score");
 	addChild(_score_label, 2); // 将记分牌加入背景层
@@ -79,7 +75,7 @@ bool GameScene::init()
 	AudioEngine::play2d(WelcomeEffect.c_str());
 
 	// 添加combo文字
-	_combo_label = Label::createWithTTF(StringUtils::format("Ready Go"), "fonts/Marker Felt.ttf", 40);
+	_combo_label = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Ready Go"));
 	_combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
 	addChild(_combo_label, FlashLevel);
 
@@ -182,12 +178,41 @@ void GameScene::tickProgress(float dt)
 {
 	// 倒计时
 	if (_progress_timer->getPercentage() > 0.0)
-		_progress_timer->setPercentage(_progress_timer->getPercentage() - 1.0);
+		_progress_timer->setPercentage(_progress_timer->getPercentage() - 10.0);
 	else
 	{
-		_combo_label->setString("game over");
+		_masked = true;
+		_combo_label->setString("Game Over");
 		_combo_label->setVisible(true);
+		AudioEngine::stopAll();
+
 		unschedule(CC_SCHEDULE_SELECTOR(GameScene::tickProgress));
+
+		const Size visibleSize = Director::getInstance()->getVisibleSize();
+		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+		auto _replay = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Replay"));
+		auto _replay_b = MenuItemLabel::create(_replay, [this](Ref* sender) {
+			_masked = false;
+			TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene());
+			Director::getInstance()->replaceScene(transition_scene);
+			});
+		_replay_b->setPosition(origin.x + visibleSize.width * 0.3, origin.y + visibleSize.height * 0.3);
+
+		auto _back = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Back"));
+		auto _back_b = MenuItemLabel::create(_back, [this](Ref* sender) {
+			_masked = false;
+			TransitionScene* transition_scene = TransitionFade::create(0.5, MenuScene::createScene());
+			Director::getInstance()->replaceScene(transition_scene);
+			});
+		_back_b->setPosition(origin.x + visibleSize.width * 0.7, origin.y + visibleSize.height * 0.3);
+
+		auto _menu = Menu::create();
+
+		_menu->addChild(_replay_b);
+		_menu->addChild(_back_b);
+		_menu->setPosition(Vec2::ZERO);
+		addChild(_menu, FlashLevel);
 	}
 }
 

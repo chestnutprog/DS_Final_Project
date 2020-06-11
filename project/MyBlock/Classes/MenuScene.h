@@ -1,6 +1,4 @@
-#ifndef __MENU_SCENE_H__
-#define __MENU_SCENE_H__
-
+#pragma once
 #include "cocos2d.h"
 
 class MenuScene : public cocos2d::Scene
@@ -12,4 +10,3 @@ public:
 	CREATE_FUNC(MenuScene);
 };
 
-#endif
