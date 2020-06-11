@@ -202,7 +202,7 @@ void GameScene::update(float dt) {
 		float blurStrength = 1.0f;
 		blurXstate.setUniform(blurXstate.getUniformLocation("u_blurOffset"), &blurOffset, sizeof(blurOffset));
 		blurXstate.setUniform(blurXstate.getUniformLocation("u_blurStrength"), &blurStrength, sizeof(blurStrength));
-		m_blurX_PostProcessLayer->setVisible(false);
+		m_blurX_PostProcessLayer->setVisible(true);
 		m_blurX_PostProcessLayer->draw(game_layer);
 		
 		// blur in Y direction
