@@ -30,6 +30,7 @@ void Users::save()
 	if (!outfile)
 		cout << "没有打开文件！" << endl;
 
+	sort(users.begin(),users.end(),[](auto &x,auto &y){return x.point > y.point;});
 	for (int i = 0; i < users.size(); i++)
 	{
 		outfile << users[i].username << " " << users[i].password << " " << users[i].point << endl;
@@ -41,6 +42,8 @@ void Users::save()
 string Users::showUsers()
 {
 	stringstream ss;
+	ss << "success" << endl;
+	ss << users.size() << endl;
 	for (int i = 0; i < users.size(); i++)
 	{
 		ss << users[i].username << " " << users[i].point << endl;

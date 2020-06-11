@@ -17,6 +17,7 @@ public:
 	virtual bool init();
 	virtual void update(float);
 	void addScore(int delta_score);	 // 分数增加
+	void combo(int combo);
 
 	CREATE_FUNC(GameScene); //释放内存
 

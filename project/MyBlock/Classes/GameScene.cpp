@@ -130,8 +130,8 @@ bool GameScene::init()
 		moved=0;
 		log("onTouchEnded");
 	};
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this); // 父类的 _eventDispatcher
 
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(touch_listener, this); // 父类的 _eventDispatcher
 
 	_masked = true;
 	// Blur X Layer
@@ -147,13 +147,80 @@ bool GameScene::init()
 	m_blurY_PostProcessLayer->setPosition(Point::ZERO);
 	this->addChild(m_blurY_PostProcessLayer, 6);
 
+	auto _pause = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Pause"));
+	auto _pause_b = MenuItemLabel::create(_pause, [this, origin, visibleSize](Ref* sender) {
+		if (!_masked) {
+			AudioEngine::pauseAll();
+			_masked = true;
+			unschedule(CC_SCHEDULE_SELECTOR(GameScene::tickProgress));
+			auto _pause_label = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Paused"));
+			_pause_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
+			addChild(_pause_label, FlashLevel);
+
+			auto _menu = Menu::create();
+			auto _replay = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Replay"));
+			auto _replay_b = MenuItemLabel::create(_replay, [this](Ref* sender) {
+				AudioEngine::stopAll();
+				_masked = false;
+				TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene());
+				Director::getInstance()->replaceScene(transition_scene);
+				});
+			_replay_b->setPosition(origin.x + visibleSize.width * 0.2, origin.y + visibleSize.height * 0.3);
+
+			auto _back = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Back"));
+			auto _back_b = MenuItemLabel::create(_back, [this](Ref* sender) {
+				AudioEngine::stopAll();
+				_masked = false;
+				TransitionScene* transition_scene = TransitionFade::create(0.5, MenuScene::createScene());
+				Director::getInstance()->replaceScene(transition_scene);
+				});
+			_back_b->setPosition(origin.x + visibleSize.width * 0.8, origin.y + visibleSize.height * 0.3);
+
+			auto _resume = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Resume"));
+			auto _resume_b = MenuItemLabel::create(_resume, [this,_menu, _pause_label](Ref* sender) {
+				AudioEngine::resumeAll();
+				_masked = false;
+				schedule(CC_SCHEDULE_SELECTOR(GameScene::tickProgress), 1.0);
+				removeChild(_menu);
+				removeChild(_pause_label);
+				});
+			_resume_b->setPosition(origin.x + visibleSize.width * 0.5, origin.y + visibleSize.height * 0.3);
+
+
+			_menu->addChild(_replay_b);
+			_menu->addChild(_back_b);
+			_menu->addChild(_resume_b);
+			_menu->setPosition(Vec2::ZERO);
+			addChild(_menu, FlashLevel);
+		}
+		});
+	_pause_b->setPosition(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.9);
+
+	auto _menu = Menu::create();
+	_menu->addChild(_pause_b);
+	_menu->setPosition(Vec2::ZERO);
+	addChild(_menu, FlashLevel);
+
 	// 默认定时器按帧更新
 	scheduleUpdate();
 
 	return true;
 }
 
-
+void GameScene::combo(int combo) {
+	_combo_label->stopAllActions();
+	const Size visibleSize = Director::getInstance()->getVisibleSize();
+	const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	_combo_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.75);
+	_combo_label->setVisible(true);
+	_combo_label->setOpacity(255);
+	_combo_label->setString(ComboTextArray[std::min(combo, (int)ComboTextArray.size() - 1)]);
+	auto _seq = Sequence::create(DelayTime::create(0.3),
+		Spawn::create(MoveBy::create(0.5, Vec2(0, 30)), FadeOut::create(0.5),nullptr),
+		CallFunc::create([this]() {_combo_label->setVisible(false); }),nullptr);
+	_combo_label->runAction(_seq);
+	AudioEngine::play2d(UnbelievableEffect);
+}
 
 void GameScene::addScoreCallback(float dt)
 {
@@ -178,18 +245,19 @@ void GameScene::tickProgress(float dt)
 {
 	// 倒计时
 	if (_progress_timer->getPercentage() > 0.0)
-		_progress_timer->setPercentage(_progress_timer->getPercentage() - 10.0);
+		_progress_timer->setPercentage(_progress_timer->getPercentage() - 1.0);
 	else
 	{
-		_masked = true;
-		_combo_label->setString("Game Over");
-		_combo_label->setVisible(true);
-		AudioEngine::stopAll();
-
 		unschedule(CC_SCHEDULE_SELECTOR(GameScene::tickProgress));
+		AudioEngine::stopAll();
+		_masked = true;
 
 		const Size visibleSize = Director::getInstance()->getVisibleSize();
 		const Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+		auto _over_label = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Game Over"));
+		_over_label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
+		addChild(_over_label, FlashLevel);
 
 		auto _replay = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Replay"));
 		auto _replay_b = MenuItemLabel::create(_replay, [this](Ref* sender) {

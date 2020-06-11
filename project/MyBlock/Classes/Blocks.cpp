@@ -197,7 +197,7 @@ void Blocks::crash(int depth, shared_ptr<CallbackWaitAll> _counter)
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++) {
                     if (i >= pos[j])
-                        new_blocks[j][i] = BaseBlock::create(*this, rand() % 6, { i,j }), _father.game_layer->addChild(new_blocks[j][i], 1);
+                        new_blocks[j][i] = BaseBlock::create(*this, rand() % numOfColor, { i,j }), _father.game_layer->addChild(new_blocks[j][i], 1);
                     if (new_blocks[j][i] != blocks[i][j]) {
                         blocks[i][j] = new_blocks[j][i];
                         blocks[i][j]->dropTo({ i,j }, counter);
@@ -215,6 +215,9 @@ void Blocks::crash(int depth, shared_ptr<CallbackWaitAll> _counter)
             blocks[i.first][i.second]->vanish(counter); //= BaseBlock::create(*this, 1, {i.first, i.second});
             blocks[i.first][i.second] = nullptr;
         }
+        if (result.size() && depth > 0) {
+            _father.combo(depth-1);
+        }
     }
 
 
@@ -225,14 +228,16 @@ int Blocks::getColor(int x, int y)
     return blocks[x][y]->color;
 }
 
-Blocks::Blocks(GameScene& father) : _father{ father }
-{
+Blocks::Blocks(GameScene& father) : Blocks(father, 8, 8, 6) {}
+
+Blocks::Blocks(GameScene& father, int height, int width, int numOfColor) : _father{ father }, height{ height }, width{ width }, numOfColor{ numOfColor } {
+    srand(time(nullptr));
     const Size visibleSize = Director::getInstance()->getVisibleSize();
     block_size = (visibleSize.width - LeftMargin - RightMargin) / width;
     do {
         for (int i = 0; i < height; i++)
             for (int j = 0; j < width; j++)
-                blocks[i][j] = BaseBlock::create(*this, rand() % 6, { i, j });
+                blocks[i][j] = BaseBlock::create(*this, rand() % numOfColor, { i, j });
     } while (try_crash().size());
     for (int i = 0; i < height; i++)
         for (int j = 0; j < width; j++)

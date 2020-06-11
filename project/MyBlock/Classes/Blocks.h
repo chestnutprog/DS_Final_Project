@@ -12,8 +12,9 @@ class Blocks : public cocos2d::Node
 {
 public:
     GameScene& _father;
-    const int height = 8;
+    const int height = 9;
     const int width = 9;
+    const int numOfColor = 4;
     const float LeftMargin = 20;
     const float RightMargin = 20;
     const float BottomMargin = 70;
@@ -31,4 +32,5 @@ private:
 
 public:
     Blocks(GameScene& father);
+    Blocks(GameScene& father,int height,int width,int numOfColor);
 };

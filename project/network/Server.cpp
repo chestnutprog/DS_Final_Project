@@ -28,13 +28,13 @@ int main()
     auto router = std::make_unique<router::express_router_t<>>();
 
     router->http_get(
-        R"(/)",
+        R"(/se_homework/)",
         [](auto req, auto params) {
             return req->create_response().set_body("Welcome to Block Crash!\n").done();
         });
 
     router->http_get(
-        R"(/user/:username)",
+        R"(/se_homework/user/:username)",
         [&](auto req, auto params) {
             const auto qp = parse_query(req->header().query());
             string username = cast_to<string>(params["username"]);
@@ -54,7 +54,7 @@ int main()
         });
 
     router->http_get(
-        R"(/login/:username/:password)",
+        R"(/se_homework/login/:username/:password)",
         [&](auto req, auto params) {
             const auto qp = parse_query(req->header().query());
             string username = cast_to<string>(params["username"]);
@@ -71,7 +71,7 @@ int main()
         });
 
     router->http_get(
-        R"(/reg/:username/:password)",
+        R"(/se_homework/reg/:username/:password)",
         [&](auto req, auto params) {
             const auto qp = parse_query(req->header().query());
             string username = cast_to<string>(params["username"]);
@@ -88,7 +88,7 @@ int main()
         });
 
     router->http_get(
-        R"(/updatePassword/:username/:password/:newPassword)",
+        R"(/se_homework/updatePassword/:username/:password/:newPassword)",
         [&](auto req, auto params) {
             const auto qp = parse_query(req->header().query());
             string username = cast_to<string>(params["username"]);
@@ -108,7 +108,7 @@ int main()
         });
 
     router->http_get(
-        R"(/updateScore/:username/:score(\d+))",
+        R"(/se_homework/updateScore/:username/:score(\d+))",
         [&](auto req, auto params) {
             const auto qp = parse_query(req->header().query());
             string username = cast_to<string>(params["username"]);
@@ -125,7 +125,7 @@ int main()
         });
 
     router->http_get(
-        R"(/users)",
+        R"(/se_homework/users)",
         [&](auto req, auto params) {
             const auto qp = parse_query(req->header().query());
             string result = users.showUsers();
