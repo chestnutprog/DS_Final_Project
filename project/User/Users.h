@@ -3,15 +3,17 @@
 #include <string>
 #include <vector>
 #include <sqlite_orm/sqlite_orm.h>
+#include <stdexcept>
 using namespace std;
 using namespace sqlite_orm;
-struct user {
-	string username;
-	string password;
-	int point;
+struct user {//user's struct
+	string username;//user's name
+	string password;//user's password
+	int point;//user's point
+	int token;//This variable is used to check whether the user has loggined in
 };
 
-struct Record {
+struct Record {//Record's struct,this struct is used to storage Ranklist information,every Record has a username and apoint
 	string username;
 	int point;
 };
@@ -22,11 +24,11 @@ class Users
 public:
 	Users();
 	~Users();
-	int login(string uname, string password);//登陆
-	int reg(string uname, string password1, string password2);//注册
-	int modifyPassword(string uname, string password, string password1, string password2);//修改密码
-	void update(string uname, int point);//得到游戏之后的玩家姓名以及玩家分数
-	vector<Record> getRankList();//得到排行耪
+	int login(string uname, string password);//The function to login
+	void reg(string uname, string password1, string password2);//The function to reg
+	void modifyPassword(string uname, string password, string password1, string password2);//The function to modify password
+	void update(string uname, int point,int token);//The function to update user score after ever game
+	vector<Record> getRankList();//The function to get ranklist
 private:
-	vector<Record> RankList;
+	vector<Record> RankList;//The ranklist of the game
 };
