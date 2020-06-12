@@ -35,6 +35,9 @@ bool MenuScene::init()
     menu_background->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
     addChild(menu_background, 0);
 
+    auto _label = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Block Crash"));
+    _label->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.8);
+    addChild(_label, 1);
 
     vector<tuple<std::string, std::function<void(void)>>> _menu = {
         { "Start Game",[]() {

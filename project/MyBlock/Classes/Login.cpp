@@ -56,7 +56,7 @@ bool LoginScene::init()
     if (loginButton) {
         float x = origin.x + visibleSize.width / 2;
         float y = origin.y + visibleSize.height  - 720.0f;
-        loginButton->setColor(Color3B::BLUE);
+        loginButton->setColor(Color3B::ORANGE);
         loginButton->setPosition(Vec2(x, y));
     }
 
@@ -64,7 +64,7 @@ bool LoginScene::init()
     if (registerButton) {
         float x = origin.x + visibleSize.width / 2 - 200.0f;
         float y = origin.y + visibleSize.height - 720.0f;
-        registerButton->setColor(Color3B::BLUE);
+        registerButton->setColor(Color3B::ORANGE);
         registerButton->setPosition(Vec2(x, y));
     }
 
@@ -72,7 +72,7 @@ bool LoginScene::init()
     if (changeButton) {
         float x = origin.x + visibleSize.width / 2 + 200.0f;
         float y = origin.y + visibleSize.height - 720.0f;
-        changeButton->setColor(Color3B::BLUE);
+        changeButton->setColor(Color3B::ORANGE);
         changeButton->setPosition(Vec2(x, y));
     }
 
@@ -85,36 +85,36 @@ bool LoginScene::init()
     this->addChild(menu, 1);
     
 
-    usernameInput = TextField::create("username", "arial", 24);// 添加用户名文本框
+    usernameInput = TextField::create("Username", "arial", 32);// 添加用户名文本框
     
         float x = origin.x + visibleSize.width / 2;
         float y = origin.y + visibleSize.height - 360.0f;
         usernameInput->setPosition(Vec2(x, y));
-        usernameInput->setColor(Color3B::BLUE);
+        usernameInput->setColor(Color3B(30,237,255));
        
         usernameInput->setCursorEnabled(true);
         addChild(usernameInput, 1);
     
 
 
-    passwordInput = TextField::create("password", "arial", 24);// 添加密码文本框
+    passwordInput = TextField::create("Password", "arial", 32);// 添加密码文本框
     if (passwordInput) {
         float x = origin.x + visibleSize.width / 2;
         float y = origin.y + visibleSize.height - 480.0f;
         passwordInput->setPosition(Vec2(x, y));
-        passwordInput->setColor(Color3B::BLUE);
+        passwordInput->setColor(Color3B(30,237,255));
         passwordInput->setCursorEnabled(true);
 
         addChild(passwordInput, 1);
     }
 
-    newpasswordInput = TextField::create("newPassword", "arial", 24);// 添加新密码文本框
+    newpasswordInput = TextField::create("NewPassword", "arial", 32);// 添加新密码文本框
     if (newpasswordInput) {
         float x = origin.x + visibleSize.width / 2;
         float y = origin.y + visibleSize.height - 600.0f;
         newpasswordInput->setPosition(Vec2(x, y));
 
-        newpasswordInput->setColor(Color3B::BLUE);
+        newpasswordInput->setColor(Color3B(30,237,255));
         newpasswordInput->setCursorEnabled(true);
 
         addChild(newpasswordInput, 1);
@@ -123,7 +123,7 @@ bool LoginScene::init()
     
     messageBox = Label::create();
     messageBox->setSystemFontName("arial");
-    messageBox->setSystemFontSize(60);
+    messageBox->setSystemFontSize(50);
     messageBox->setColor(Color3B::RED);
     if (messageBox) {
         float x = origin.x + visibleSize.width / 2;
@@ -146,18 +146,17 @@ void LoginScene::LoginButtonCallback(cocos2d::Ref* pSender) {
 void LoginScene::LoginCallBack(bool suc, string response) {
 
     if (!suc) {
+        messageBox->setVisible(true);
         this->messageBox->setString(response);
-
-        auto relogin_scene = LoginScene::createScene();
-        TransitionScene* transition_scene = TransitionFade::create(0.5, relogin_scene);
-        Director::getInstance()->replaceScene(transition_scene);
 
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-        messageBox->runAction(Sequence::create(DelayTime::create(6.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
+        messageBox->runAction(Sequence::create(DelayTime::create(3.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
             messageBox->setVisible(false);
             messageBox->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 600.0f);
+            auto relogin_scene = LoginScene::createScene();
+            TransitionScene* transition_scene = TransitionFade::create(0.5, relogin_scene);
+            Director::getInstance()->replaceScene(transition_scene);
             }),
             NULL));
 
@@ -165,20 +164,22 @@ void LoginScene::LoginCallBack(bool suc, string response) {
         return;
     }
     else {
+        messageBox->setVisible(true);
         this->messageBox->setString("Login Successful！");
 
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        messageBox->runAction(Sequence::create(DelayTime::create(6.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
+
+        messageBox->runAction(Sequence::create(DelayTime::create(3.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
             messageBox->setVisible(false);
             messageBox->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 600.0f);
+            auto game_scene = MenuScene::createScene();
+            TransitionScene* transition_scene = TransitionFade::create(0.5, game_scene);
+            Director::getInstance()->replaceScene(transition_scene);
             }),
             NULL));
 
-        auto game_scene = GameScene::createScene();
-        TransitionScene* transition_scene = TransitionFade::create(0.5, game_scene);
-        Director::getInstance()->replaceScene(transition_scene);
 
     }
 
@@ -197,22 +198,33 @@ void LoginScene::RegisterButtonCallback(cocos2d::Ref* pSender) {
 void LoginScene::RegCallBack(bool suc, string response) {
 
     if (!suc) {
+        messageBox->setVisible(true);
         this->messageBox->setString(response);
 
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        messageBox->runAction(Sequence::create(DelayTime::create(6.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
+        messageBox->runAction(Sequence::create(DelayTime::create(3.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
+            messageBox->setVisible(false);
+            messageBox->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 600.0f);
+            auto relogin_scene = LoginScene::createScene();
+            TransitionScene* transition_scene = TransitionFade::create(0.5, relogin_scene);
+            Director::getInstance()->replaceScene(transition_scene);
+            }),
+            NULL));
+    }
+    else {
+        messageBox->setVisible(true);
+        this->messageBox->setString("Register Successful！");
+
+        auto visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+        messageBox->runAction(Sequence::create(DelayTime::create(3.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
             messageBox->setVisible(false);
             messageBox->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 600.0f);
             }),
             NULL));
-
-        auto relogin_scene = LoginScene::createScene();
-        TransitionScene* transition_scene = TransitionFade::create(0.5, relogin_scene);
-        Director::getInstance()->replaceScene(transition_scene);
-
-        return;
     }
 
 }
@@ -224,7 +236,7 @@ void LoginScene::ChangeButtonCallBack(cocos2d::Ref* pSender) {
     std::string password = passwordInput->getString();
     std::string newpassword = newpasswordInput->getString();
 
-    Client::getInstance()->updatePassword(password , newpassword, CC_CALLBACK_2(LoginScene::LoginCallBack, this));
+    Client::getInstance()->updatePassword(password , newpassword, CC_CALLBACK_2(LoginScene::ChangeCallBack, this));
 
 }
 
@@ -232,30 +244,34 @@ void LoginScene::ChangeButtonCallBack(cocos2d::Ref* pSender) {
 void LoginScene::ChangeCallBack(bool suc, string response) {
 
     if (!suc) {
+        messageBox->setVisible(true);
         this->messageBox->setString(response);
 
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        messageBox->runAction(Sequence::create(DelayTime::create(6.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
+        messageBox->runAction(Sequence::create(DelayTime::create(3.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
         messageBox->setVisible(false);																 
         messageBox->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 600.0f);
-            }),
-            NULL));
 
         auto relogin_scene = LoginScene::createScene();
         TransitionScene* transition_scene = TransitionFade::create(0.5, relogin_scene);
         Director::getInstance()->replaceScene(transition_scene);
+            }),
+            NULL));
+
+
 
         return;
     }
     else {
+        messageBox->setVisible(true);
         this->messageBox->setString("Change Password Successful！");
 
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-        messageBox->runAction(Sequence::create(DelayTime::create(6.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
+        messageBox->runAction(Sequence::create(DelayTime::create(3.0), MoveBy::create(0.3, Vec2(200, 0)), CallFunc::create([=]() {
             messageBox->setVisible(false);
             messageBox->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 - 600.0f);
             }),

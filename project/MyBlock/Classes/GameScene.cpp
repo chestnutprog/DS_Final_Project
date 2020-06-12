@@ -245,7 +245,7 @@ void GameScene::combo(int combo) {
 
 void GameScene::addScoreCallback(float dt)
 {
-	_animation_score += max(min(rand() % (_score - _animation_score)/20, _score - _animation_score),1);
+	_animation_score += max(min(rand() % (_score - _animation_score)/10, _score - _animation_score),1);
 	_score_label->setString(StringUtils::format("score: %d", _animation_score));
 
 	// 分数已经逐个增加到记分牌

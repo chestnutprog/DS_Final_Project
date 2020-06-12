@@ -30,6 +30,7 @@ void Client::login(string username, string password, function<void(bool, string)
 		}
 		else if (status == "failed") {
 			string message;
+			ss.ignore(10, '\n');
 			getline(ss, message);
 			_cb(false, message);
 		}
@@ -58,7 +59,7 @@ void  Client::reg(string username, string password, function<void(bool, string)>
 			return;
 		}
 		auto* buffer = response->getResponseData();
-		string s = string(buffer->data(), buffer->size());
+		string s = string(buffer->data(), buffer->size()) + "\n";
 		stringstream ss(s);
 		string status;
 		ss >> status;
@@ -67,6 +68,7 @@ void  Client::reg(string username, string password, function<void(bool, string)>
 		}
 		else if (status == "failed") {
 			string message;
+			ss.ignore(10, '\n');
 			getline(ss, message);
 			_cb(false, message);
 		}
@@ -103,6 +105,7 @@ void  Client::updatePassword(string oldPassword, string newPassword, function<vo
 		}
 		else if (status == "failed") {
 			string message;
+			ss.ignore(10, '\n');
 			getline(ss, message);
 			_cb(false, message);
 		}
@@ -139,6 +142,7 @@ void  Client::updateScore(int newScore, function<void(bool, string)>_cb) {
 		}
 		else if (status == "failed") {
 			string message;
+			ss.ignore(10, '\n');
 			getline(ss, message);
 			_cb(false, message);
 		}
@@ -185,6 +189,7 @@ void Client::ranklist(function<void(bool, string, vector<pair<string, int>>)> _c
 		}
 		else if (status == "failed") {
 			string message;
+			ss.ignore(10, '\n');
 			getline(ss, message);
 			_cb(false, message, result);
 		}

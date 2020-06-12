@@ -81,7 +81,7 @@ int main()
             if (u == 102)
                 result = "success\n";
             else
-                result = "failed\nThis username has already existed in system.\n";
+                result = "failed\nUsername has already existed.\n";
             return req->create_response()
                 .set_body(result)
                 .done();
@@ -99,7 +99,7 @@ int main()
             if (u == 103)
                 result = "success\n";
             else if (u == 204)
-                result = "failed\nThis username doesn't exist in system.\n";
+                result = "failed\nUsername doesn't exist.\n";
             else
                 result = "failed\nWrong password.\n";
             return req->create_response()
@@ -118,7 +118,7 @@ int main()
             if (u == 103)
                 result = "success\n";
             else
-                result = "failed\nThis username has already existed in system.\n";
+                result = "failed\nUnknown Error.\n";
             return req->create_response()
                 .set_body(result)
                 .done();
