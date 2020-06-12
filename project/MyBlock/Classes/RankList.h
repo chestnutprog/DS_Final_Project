@@ -1,7 +1,10 @@
 #ifndef __RANK_LIST_H__
 #define __RANK_LIST_H__
-
+#include <string.h>
 #include "cocos2d.h"
+#include <functional>
+
+using namespace std;
 
 class Player;
 
@@ -22,7 +25,7 @@ public:
 	CREATE_FUNC(RankScene);
 
 private:
-	std::vector<PlayerInf> _player_list; // 存储玩家信息
+	std::vector<pair<string, int>> _player_list; // 存储玩家信息
 	int player_num; // 存储的玩家总人数
 };
 

@@ -7,6 +7,8 @@
 #include <tuple>
 #include <string>
 #include <functional>
+#include "HelpAndAbout.h"
+#include "Login.h"
 //#include "HelpAndAbout.h"
 //#include "Register.h"
 
@@ -39,14 +41,25 @@ bool MenuScene::init()
     vector<tuple<std::string, std::function<void(void)>>> _menu = {
         { "Start Game",[]() {
                 TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene());
-                Director::getInstance()->replaceScene(transition_scene); 
+                Director::getInstance()->replaceScene(transition_scene);
             }
         },
         { "Rank List",[]() {
                 TransitionScene* transition_scene = TransitionFade::create(0.5, RankScene::createScene());
                 Director::getInstance()->replaceScene(transition_scene);
             }
+        },
+       { "Help And About",[]() {
+                TransitionScene* transition_scene = TransitionFade::create(0.5, HelpScene::createScene());
+                Director::getInstance()->replaceScene(transition_scene);
+            }
+        },
+       { "Login and Register",[]() {
+                TransitionScene* transition_scene = TransitionFade::create(0.5, LoginScene::createScene());
+                Director::getInstance()->replaceScene(transition_scene);
+            }
         }
+
     };
     {
         int i = 0;
