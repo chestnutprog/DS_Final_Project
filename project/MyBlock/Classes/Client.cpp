@@ -25,6 +25,7 @@ void Client::login(string username, string password, function<void(bool, string)
 		ss >> status;
 		if (status == "success") {
 			_username = username;
+			ss >> _token;
 			_cb(true, "Login success!");
 		}
 		else if (status == "failed") {
@@ -114,7 +115,7 @@ void  Client::updatePassword(string oldPassword, string newPassword, function<vo
 }
 void  Client::updateScore(int newScore, function<void(bool, string)>_cb) {
 	HttpRequest* request = new (std::nothrow) HttpRequest();
-	request->setUrl(baseUrl + "updateScore/" + _username + "/" + to_string(newScore));
+	request->setUrl(baseUrl + "updateScore/" + _username + "/" + to_string(newScore) + "?token=" + _token);
 	request->setRequestType(HttpRequest::Type::GET);
 	request->setResponseCallback([_cb, this](HttpClient* sender, HttpResponse* response) {
 		if (!response)

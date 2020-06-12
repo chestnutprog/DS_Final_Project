@@ -10,7 +10,8 @@ using namespace cocos2d::network;
 class Client {
 private:
     static Client* _instance;
-    string _username;
+    string _username = "Anonymous";
+    string _token = "0";
     Client() {};
 public:
     static Client* getInstance() {

@@ -1,29 +1,25 @@
 
 #include "AudioEngine.h"
 #include "ui/CocosGUI.h"
-#include "MenuScene.h"
+#include "ModeChoose.h"
 #include "GameScene.h"
-#include "RankList.h"
+#include "MenuScene.h"
 #include <tuple>
 #include <string>
 #include <functional>
-#include "HelpAndAbout.h"
-#include "Login.h"
-#include "ModeChoose.h"
-
 
 USING_NS_CC;
 using namespace ui; // button namespace
 
 
-Scene* MenuScene::createScene()
+Scene* ModeChoose::createScene()
 {
-    return MenuScene::create();
+    return ModeChoose::create();
 }
 
-bool MenuScene::init()
+bool ModeChoose::init()
 {
-    if ( !Scene::init() )
+    if (!Scene::init())
     {
         return false;
     }
@@ -37,23 +33,23 @@ bool MenuScene::init()
 
 
     vector<tuple<std::string, std::function<void(void)>>> _menu = {
-        { "Start Game",[]() {
-                TransitionScene* transition_scene = TransitionFade::create(0.5, ModeChoose::createScene());
+        { "Easy Mode",[]() {
+                TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene(6,6,4));
                 Director::getInstance()->replaceScene(transition_scene);
             }
         },
-        { "Rank List",[]() {
-                TransitionScene* transition_scene = TransitionFade::create(0.5, RankScene::createScene());
+        { "Middle Mode",[]() {
+                TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene(7,7,5));
                 Director::getInstance()->replaceScene(transition_scene);
             }
         },
-       { "Help And About",[]() {
-                TransitionScene* transition_scene = TransitionFade::create(0.5, HelpScene::createScene());
+       { "Hard Mode",[]() {
+                TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene(8,8,6));
                 Director::getInstance()->replaceScene(transition_scene);
             }
         },
-       { "Login and Register",[]() {
-                TransitionScene* transition_scene = TransitionFade::create(0.5, LoginScene::createScene());
+       { "Back",[]() {
+                TransitionScene* transition_scene = TransitionFade::create(0.5, MenuScene::createScene());
                 Director::getInstance()->replaceScene(transition_scene);
             }
         }
@@ -66,7 +62,7 @@ bool MenuScene::init()
             _button->setTitleText(title);
             _button->setTitleFontSize(24);
             _button->setScale(1.0f);
-            _button->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * ( 0.7 - (i++)/8.0)));
+            _button->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * (0.7 - (i++) / 8.0)));
             _button->addTouchEventListener([action](Ref* sender, Widget::TouchEventType type) {
                 switch (type)
                 {
@@ -81,7 +77,7 @@ bool MenuScene::init()
             addChild(_button);
         }
     }
-    
+
     return true;
 }
 

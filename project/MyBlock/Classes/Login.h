@@ -26,12 +26,12 @@ public:
 
     virtual bool init();
 
-    void LoginButtonCallback(Ref* pSender);//µÇÂ¼º¯Êý
-    void RegisterButtonCallback(Ref* pSender);//×¢²áº¯Êý
+    void LoginButtonCallback(Ref* pSender);//ç™»å½•å‡½æ•°
+    void RegisterButtonCallback(Ref* pSender);//æ³¨å†Œå‡½æ•°
     void ChangeButtonCallBack(Ref* psender);
 
-    void LoginCallBack(bool suc, string response);//µÇÂ¼»Øµ÷
-    void RegCallBack(bool suc, string response);//×¢²á»Øµ÷
+    void LoginCallBack(bool suc, string response);//ç™»å½•å›žè°ƒ
+    void RegCallBack(bool suc, string response);//æ³¨å†Œå›žè°ƒ
     void ChangeCallBack(bool suc, string response);
 
     CREATE_FUNC(LoginScene);

@@ -25,21 +25,21 @@ bool LoginScene::init()
     login_background->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
     addChild(login_background, 0);
 
-    Button* menu_btn = Button::create("images/menu.png"); // Ìí¼Ó·µ»Ø°´Å¥
+    Button* menu_btn = Button::create("images/menu.png"); // æ·»åŠ è¿”å›žæŒ‰é’®
     menu_btn->setScale(1.25);
     menu_btn->setPosition(Vec2(origin.x + visibleSize.width / 2,
         origin.y + visibleSize.height / 2 -300));
     menu_btn->addTouchEventListener([&](Ref* sender, Widget::TouchEventType type) {
-        // °´Å¥µã»÷ÊÂ¼þ
+        // æŒ‰é’®ç‚¹å‡»äº‹ä»¶
         switch (type)
         {
         case ui::Widget::TouchEventType::BEGAN:
-            // ²¥·ÅÒôÐ§
+            // æ’­æ”¾éŸ³æ•ˆ
             AudioEngine::play2d("sound/button.mp3");
             break;
         case ui::Widget::TouchEventType::ENDED:
         {
-            // ÇÐ»»µ½ÓÎÏ·³¡¾°
+            // åˆ‡æ¢åˆ°æ¸¸æˆåœºæ™¯
             auto menu_scene = MenuScene::createScene();
             TransitionScene* transition_scene = TransitionFade::create(0.5, menu_scene);
             Director::getInstance()->replaceScene(transition_scene);
@@ -52,7 +52,7 @@ bool LoginScene::init()
 
     addChild(menu_btn);
 
-    auto loginButton = MenuItemFont::create("Login", CC_CALLBACK_1(LoginScene::LoginButtonCallback, this));// Ìí¼ÓµÇÂ¼°´Å¥
+    auto loginButton = MenuItemFont::create("Login", CC_CALLBACK_1(LoginScene::LoginButtonCallback, this));// æ·»åŠ ç™»å½•æŒ‰é’®
     if (loginButton) {
         float x = origin.x + visibleSize.width / 2;
         float y = origin.y + visibleSize.height  - 720.0f;
@@ -60,7 +60,7 @@ bool LoginScene::init()
         loginButton->setPosition(Vec2(x, y));
     }
 
-    auto registerButton = MenuItemFont::create("Register", CC_CALLBACK_1(LoginScene::RegisterButtonCallback, this));// Ìí¼Ó×¢²á°´Å¥
+    auto registerButton = MenuItemFont::create("Register", CC_CALLBACK_1(LoginScene::RegisterButtonCallback, this));// æ·»åŠ æ³¨å†ŒæŒ‰é’®
     if (registerButton) {
         float x = origin.x + visibleSize.width / 2 - 200.0f;
         float y = origin.y + visibleSize.height - 720.0f;
@@ -68,7 +68,7 @@ bool LoginScene::init()
         registerButton->setPosition(Vec2(x, y));
     }
 
-    auto changeButton = MenuItemFont::create("Change Password", CC_CALLBACK_1(LoginScene::ChangeButtonCallBack, this));// Ìí¼Ó×¢²á°´Å¥
+    auto changeButton = MenuItemFont::create("Change Password", CC_CALLBACK_1(LoginScene::ChangeButtonCallBack, this));// æ·»åŠ æ³¨å†ŒæŒ‰é’®
     if (changeButton) {
         float x = origin.x + visibleSize.width / 2 + 200.0f;
         float y = origin.y + visibleSize.height - 720.0f;
@@ -85,7 +85,7 @@ bool LoginScene::init()
     this->addChild(menu, 1);
     
 
-    usernameInput = TextField::create("username", "arial", 24);// Ìí¼ÓÓÃ»§ÃûÎÄ±¾¿ò
+    usernameInput = TextField::create("username", "arial", 24);// æ·»åŠ ç”¨æˆ·åæ–‡æœ¬æ¡†
     
         float x = origin.x + visibleSize.width / 2;
         float y = origin.y + visibleSize.height - 360.0f;
@@ -97,7 +97,7 @@ bool LoginScene::init()
     
 
 
-    passwordInput = TextField::create("password", "arial", 24);// Ìí¼ÓÃÜÂëÎÄ±¾¿ò
+    passwordInput = TextField::create("password", "arial", 24);// æ·»åŠ å¯†ç æ–‡æœ¬æ¡†
     if (passwordInput) {
         float x = origin.x + visibleSize.width / 2;
         float y = origin.y + visibleSize.height - 480.0f;
@@ -108,7 +108,7 @@ bool LoginScene::init()
         addChild(passwordInput, 1);
     }
 
-    newpasswordInput = TextField::create("newPassword", "arial", 24);// Ìí¼ÓÐÂÃÜÂëÎÄ±¾¿ò
+    newpasswordInput = TextField::create("newPassword", "arial", 24);// æ·»åŠ æ–°å¯†ç æ–‡æœ¬æ¡†
     if (newpasswordInput) {
         float x = origin.x + visibleSize.width / 2;
         float y = origin.y + visibleSize.height - 600.0f;
@@ -134,7 +134,7 @@ bool LoginScene::init()
     
     return true;
 }
-// µÇÂ¼º¯Êý
+// ç™»å½•å‡½æ•°
 void LoginScene::LoginButtonCallback(cocos2d::Ref* pSender) {
 
     std::string username = usernameInput->getString();
@@ -142,7 +142,7 @@ void LoginScene::LoginButtonCallback(cocos2d::Ref* pSender) {
     
     Client::getInstance()->login(username,password, CC_CALLBACK_2(LoginScene::LoginCallBack, this));
 }
-//µÇÂ¼»Øµ÷
+//ç™»å½•å›žè°ƒ
 void LoginScene::LoginCallBack(bool suc, string response) {
 
     if (!suc) {
@@ -165,7 +165,7 @@ void LoginScene::LoginCallBack(bool suc, string response) {
         return;
     }
     else {
-        this->messageBox->setString("Login Successful£¡");
+        this->messageBox->setString("Login Successfulï¼");
 
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -184,7 +184,7 @@ void LoginScene::LoginCallBack(bool suc, string response) {
 
 }
 
-// ×¢²áº¯Êý
+// æ³¨å†Œå‡½æ•°
 void LoginScene::RegisterButtonCallback(cocos2d::Ref* pSender) {
 
     std::string username = usernameInput->getString();
@@ -193,7 +193,7 @@ void LoginScene::RegisterButtonCallback(cocos2d::Ref* pSender) {
     Client::getInstance()->reg(username, password, CC_CALLBACK_2(LoginScene::RegCallBack, this));
 }
 
-//×¢²á»Øµ÷
+//æ³¨å†Œå›žè°ƒ
 void LoginScene::RegCallBack(bool suc, string response) {
 
     if (!suc) {
@@ -217,7 +217,7 @@ void LoginScene::RegCallBack(bool suc, string response) {
 
 }
 
-// ÐÞ¸ÄÃÜÂëº¯Êý
+// ä¿®æ”¹å¯†ç å‡½æ•°
 void LoginScene::ChangeButtonCallBack(cocos2d::Ref* pSender) {
 
     std::string username = usernameInput->getString();
@@ -228,7 +228,7 @@ void LoginScene::ChangeButtonCallBack(cocos2d::Ref* pSender) {
 
 }
 
-//ÐÞ¸ÄÃÜÂë»Øµ÷
+//ä¿®æ”¹å¯†ç å›žè°ƒ
 void LoginScene::ChangeCallBack(bool suc, string response) {
 
     if (!suc) {
@@ -250,7 +250,7 @@ void LoginScene::ChangeCallBack(bool suc, string response) {
         return;
     }
     else {
-        this->messageBox->setString("Change Password Successful£¡");
+        this->messageBox->setString("Change Password Successfulï¼");
 
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Vec2 origin = Director::getInstance()->getVisibleOrigin();

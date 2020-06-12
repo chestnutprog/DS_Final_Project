@@ -35,6 +35,28 @@ Scene* GameScene::createScene()
 	return game_scene;
 }
 
+Scene* GameScene::createScene(int height, int width, int numOfColor)
+{
+	Scene* game_scene = GameScene::create(height, width, numOfColor);
+	return game_scene;
+}
+
+GameScene* GameScene::create(int height, int width, int numOfColor)
+{
+	GameScene* pRet = new(std::nothrow) GameScene(height, width, numOfColor);
+	if (pRet && pRet->init())
+	{
+		pRet->autorelease();
+		return pRet;
+	}
+	else
+	{
+		delete pRet;
+		pRet = nullptr;
+		return nullptr;
+	}
+}
+
 // 初始化游戏场景
 bool GameScene::init()
 {
@@ -162,7 +184,7 @@ bool GameScene::init()
 			auto _replay_b = MenuItemLabel::create(_replay, [this](Ref* sender) {
 				AudioEngine::stopAll();
 				_masked = false;
-				TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene());
+				TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene(_blocks.height,_blocks.width,_blocks.numOfColor));
 				Director::getInstance()->replaceScene(transition_scene);
 				});
 			_replay_b->setPosition(origin.x + visibleSize.width * 0.2, origin.y + visibleSize.height * 0.3);
@@ -185,7 +207,6 @@ bool GameScene::init()
 				removeChild(_pause_label);
 				});
 			_resume_b->setPosition(origin.x + visibleSize.width * 0.5, origin.y + visibleSize.height * 0.3);
-
 
 			_menu->addChild(_replay_b);
 			_menu->addChild(_back_b);
@@ -224,7 +245,7 @@ void GameScene::combo(int combo) {
 
 void GameScene::addScoreCallback(float dt)
 {
-	_animation_score += min(rand() % 10, _score - _animation_score);
+	_animation_score += max(min(rand() % (_score - _animation_score)/20, _score - _animation_score),1);
 	_score_label->setString(StringUtils::format("score: %d", _animation_score));
 
 	// 分数已经逐个增加到记分牌
@@ -238,7 +259,7 @@ void GameScene::addScore(int delta_score)
 	_score += delta_score;
 	log("real_score: %d", _score);
 	// 进入加分动画
-	schedule(CC_SCHEDULE_SELECTOR(GameScene::addScoreCallback), 0.03);
+	schedule(CC_SCHEDULE_SELECTOR(GameScene::addScoreCallback), 0.05);
 }
 
 void GameScene::tickProgress(float dt)
@@ -262,7 +283,7 @@ void GameScene::tickProgress(float dt)
 		auto _replay = Label::createWithBMFont("fonts/futura-48.fnt", StringUtils::format("Replay"));
 		auto _replay_b = MenuItemLabel::create(_replay, [this](Ref* sender) {
 			_masked = false;
-			TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene());
+			TransitionScene* transition_scene = TransitionFade::create(0.5, GameScene::createScene(_blocks.height,_blocks.width,_blocks.numOfColor));
 			Director::getInstance()->replaceScene(transition_scene);
 			});
 		_replay_b->setPosition(origin.x + visibleSize.width * 0.3, origin.y + visibleSize.height * 0.3);
@@ -281,6 +302,8 @@ void GameScene::tickProgress(float dt)
 		_menu->addChild(_back_b);
 		_menu->setPosition(Vec2::ZERO);
 		addChild(_menu, FlashLevel);
+
+		Client::getInstance()->updateScore(_score, [](bool, auto) {});
 	}
 }
 
